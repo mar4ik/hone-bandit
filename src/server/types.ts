@@ -34,6 +34,8 @@ export interface ExperimentDef {
   goal: GoalRule;
   /** Sites allowed to call the public endpoints from a browser, like "https://aiqb.example". */
   allowedOrigins: string[];
+  /** Selectors the page script hides until the answer arrives (its data-hide). Kept so the script tag can be shown again. Hone itself does not use it. */
+  hide?: string;
   policy: Policy;
   config: Config;
 }
