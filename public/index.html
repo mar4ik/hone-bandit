@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hone</title>
+<meta name="description" content="Hone is an agent that tests and improves any website with a multi-armed bandit. Early preview.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #F6F6F1;
+  --ink: #14202B;
+  --muted: #4A5865;
+  --rule: #14202B;
+  --soft-rule: #D9D9D0;
+  --accent: #C8341C;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+header { border-bottom: 1px solid var(--rule); }
+header .wrap { padding-top: 18px; padding-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.brand { font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+header a { color: var(--ink); font-weight: 500; text-decoration: none; border-bottom: 2px solid var(--ink); padding-bottom: 2px; }
+h1 { font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: clamp(36px, 7vw, 56px); line-height: 1.1; letter-spacing: -0.015em; margin: 56px 0 16px; }
+.lede { font-size: 19px; color: var(--muted); max-width: 640px; margin: 0 0 24px; }
+.status { display: inline-block; border: 1px solid var(--rule); padding: 6px 12px; font-size: 14px; margin: 0 0 56px; }
+.status b { color: var(--accent); font-weight: 600; }
+section { border-top: 1px solid var(--rule); padding: 40px 0 8px; }
+h2 { font-family: 'Newsreader', Georgia, serif; font-weight: 500; font-size: 28px; margin: 0 0 6px; }
+.cap { color: var(--muted); margin: 0 0 20px; max-width: 640px; }
+figure { margin: 0 0 48px; }
+figure img { display: block; width: 100%; height: auto; border: 1px solid var(--soft-rule); background: #fff; }
+figcaption { font-size: 14px; color: var(--muted); margin-top: 8px; }
+footer { border-top: 1px solid var(--rule); padding: 24px 0 56px; color: var(--muted); font-size: 14px; }
+footer a { color: var(--ink); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">Hone</div>
+    <a href="https://github.com/mar4ik/hone-bandit">GitHub</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>An agent that tests and improves any website.</h1>
+  <p class="lede">It learns from live traffic with a multi-armed bandit, shifts visitors toward what works, and confirms every win with a fixed A/B test before keeping it.</p>
+  <p class="status"><b>Early preview.</b> The core loop, safety layer and simulator are built. The live app is not built yet.</p>
+
+  <section>
+    <h2>Connect a site</h2>
+    <p class="cap">Paste an address, add one line of code, say what counts as success, and set the rules once.</p>
+    <figure>
+      <img src="ledger-connect.png" alt="Design mock of the Connect a site screen: six numbered steps for site, install, goal, places to change, rules and review." width="1360" height="2060" loading="lazy">
+      <figcaption>UI mock. All names, copy and numbers are sample data.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>What the agent did</h2>
+    <p class="cap">Results, running tests, the safety checks that stopped a variant, and what it has learned.</p>
+    <figure>
+      <img src="ledger-activity.png" alt="Design mock of the activity screen: purchases per visitor up 19 percent, a table of four variants, a traffic chart, guardrails and kept improvements." width="1360" height="1920" loading="lazy">
+      <figcaption>UI mock. All names, copy and numbers are sample data.</figcaption>
+    </figure>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">Hone is a working name. Source and notes on <a href="https://github.com/mar4ik/hone-bandit">GitHub</a>.</div>
+</footer>
+</body>
+</html>
