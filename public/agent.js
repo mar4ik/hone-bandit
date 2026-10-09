@@ -108,6 +108,13 @@
     return true;
   }
 
+  // Only data- attributes with plain values: nothing that loads, runs or links can be switched this way.
+  function setAttr(el, name, value) {
+    if (!/^data-[a-z][a-z0-9-]{0,40}$/.test(String(name)) || !/^[A-Za-z0-9_-]{1,32}$/.test(String(value))) return false;
+    el.setAttribute(name, value);
+    return true;
+  }
+
   /** Returns false if any change could not be applied (a selector that matches nothing, say). */
   function applyChanges(changes) {
     var ok = true;
@@ -119,6 +126,7 @@
         if (c.kind === 'text') setText(el, c.text);
         else if (c.kind === 'style') setStyle(el, c.style || {});
         else if (c.kind === 'order') { if (!setOrder(el, c.order || [])) ok = false; }
+        else if (c.kind === 'attr') { if (!setAttr(el, c.attr, c.value)) ok = false; }
       });
     });
     return ok;

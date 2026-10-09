@@ -9,6 +9,7 @@ const policy: Policy = {
     'h1.hero-title': { kinds: ['text'], maxChars: 70 },
     'a.hero-cta': { kinds: ['text', 'style'], maxChars: 28 },
     'section#courses': { kinds: ['order'] },
+    html: { kinds: ['attr'], attrs: { 'data-hero': ['a', 'b'] } },
   },
   neverChange: ['price', 'legal', 'consent', 'form', 'checkout', 'cookie'],
   facts: { numbers: [], claims: [] },
@@ -125,6 +126,33 @@ test('reordering may only rearrange what is already there', () => {
   assert.equal(checkVariant(ok, policy).ok, true);
   assert.ok(checks(checkVariant({ ...ok, order: ['starter', 'secret-offer', 'popular'] }, policy)).includes('scope'));
   assert.ok(checks(checkVariant({ ...ok, order: ['starter', 'starter', 'popular'] }, policy)).includes('scope'));
+});
+
+test('switching a data- attribute is allowed only to a value the owner listed', () => {
+  const ok: Proposal = { selector: 'html', kind: 'attr', attr: 'data-hero', value: 'a' };
+  assert.equal(checkVariant(ok, policy).ok, true, 'no look-today context is needed for a switch');
+  assert.ok(checks(checkVariant({ ...ok, value: 'c' }, policy)).includes('scope'), 'a value that was not listed');
+  assert.ok(checks(checkVariant({ ...ok, value: 'a" onload="x' }, policy)).includes('scope'), 'a value with markup');
+  assert.ok(checks(checkVariant({ ...ok, attr: 'data-other' }, policy)).includes('scope'), 'an attribute that was not listed');
+  for (const attr of ['onclick', 'href', 'src', 'style', 'class', 'data-', 'DATA-hero', 'data-hero onclick']) {
+    assert.ok(checks(checkVariant({ ...ok, attr }, policy)).includes('scope'), `${attr} cannot be set`);
+  }
+  assert.ok(checks(checkVariant({ ...ok, selector: 'body' }, policy)).includes('scope'), 'a place that was not allowed');
+  assert.ok(checks(checkVariant({ ...ok, attr: undefined }, policy)).includes('scope'), 'no attribute named');
+  assert.ok(checks(checkVariant({ ...ok, value: undefined }, policy)).includes('scope'), 'no value');
+});
+
+test('a place that allows "attr" but lists no attributes can switch nothing; locked words still apply', () => {
+  const bare: Policy = { ...policy, slots: { html: { kinds: ['attr'] } } };
+  assert.ok(checks(checkVariant({ selector: 'html', kind: 'attr', attr: 'data-hero', value: 'a' }, bare)).includes('scope'));
+  const locked: Policy = { ...policy, slots: { '.price-box': { kinds: ['attr'], attrs: { 'data-x': ['y'] } } } };
+  assert.ok(checks(checkVariant({ selector: '.price-box', kind: 'attr', attr: 'data-x', value: 'y' }, locked)).includes('scope'));
+  assert.ok(checks(checkVariant({ selector: 'html', kind: 'text', text: 'hello', context: ctx }, policy)).includes('scope'), 'a place that only allows attr cannot have its text changed');
+});
+
+test('text and style changes without a look-today context are refused, not guessed', () => {
+  assert.ok(checks(checkVariant({ selector: 'h1.hero-title', kind: 'text', text: 'Learn AI without the jargon' }, policy)).includes('readability'));
+  assert.ok(checks(checkVariant({ selector: 'a.hero-cta', kind: 'style', style: { color: '#FFFFFF' } }, policy)).includes('readability'));
 });
 
 test('contrast maths matches known values', () => {

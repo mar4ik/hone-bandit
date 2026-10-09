@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { handleAdmin, handleDecide, handleEvent, handleOptions, handleTick } from '../src/server/handlers.ts';
 import { MemoryStore } from '../src/server/memory-store.ts';
 import type { DecideResponse } from '../src/server/types.ts';
-import { ADMIN, CRON, DAY, ORIGIN, adminReq, decideReq, eventReq, experimentBody, makeCtx, titleCtx, visitorId } from './support/fixtures.ts';
+import { ADMIN, CRON, DAY, ORIGIN, adminReq, decideReq, eventReq, experimentBody, makeCtx, policy, titleCtx, visitorId } from './support/fixtures.ts';
 
 const EXP = 'exp_test0001';
 
@@ -45,6 +45,61 @@ test('creation is refused, with reasons, when a variant breaks the safety rules'
   assert.ok(body.errors.some((e) => /v1.*facts/.test(e)));
   assert.ok(body.errors.some((e) => /v1.*honesty/.test(e)));
   assert.ok(body.errors.some((e) => /v2.*scope/.test(e)));
+  assert.equal((await env.ctx.store.listAll()).length, 0, 'nothing is stored');
+});
+
+const heroSwitch = (over: Record<string, unknown> = {}, slot: Record<string, unknown> = {}) => experimentBody({
+  policy: { ...policy, slots: { html: { kinds: ['attr'], attrs: { 'data-hero': ['a', 'b'] }, ...slot } } },
+  variants: { 'hero-a': { label: 'Hero A', changes: [{ selector: 'html', kind: 'attr', attr: 'data-hero', value: 'a' }] } },
+  ...over,
+});
+
+test('a variant may switch an allowed data- attribute, and visitors get exactly that change', async () => {
+  const env = makeCtx();
+  const res = await handleAdmin(adminReq('POST', '/experiments', heroSwitch({ config: { canaryShare: 0.5 } })), env.ctx);
+  assert.equal(res.status, 201, JSON.stringify(await res.clone().json()));
+  let seen = '';
+  for (let i = 0; i < 40 && seen !== 'hero-a'; i++) {
+    const { body: d } = await decide(env, visitorId(i));
+    if (d.variant === 'hero-a') {
+      seen = d.variant;
+      assert.deepEqual(d.changes, [{ selector: 'html', kind: 'attr', attr: 'data-hero', value: 'a' }]);
+    }
+  }
+  assert.equal(seen, 'hero-a', 'someone is given the variant');
+});
+
+test('switching attributes is refused unless the policy lists the attribute and the value', async () => {
+  const env = makeCtx();
+  const cases: Array<[string, Record<string, unknown>, RegExp]> = [
+    ['value not listed', { variants: { x: { label: 'x', changes: [{ selector: 'html', kind: 'attr', attr: 'data-hero', value: 'c' }] } } }, /x.*scope.*not one of the values/],
+    ['attribute not listed', { variants: { x: { label: 'x', changes: [{ selector: 'html', kind: 'attr', attr: 'data-theme', value: 'a' }] } } }, /x.*scope.*does not allow changing data-theme/],
+    ['not a data- attribute', { variants: { x: { label: 'x', changes: [{ selector: 'html', kind: 'attr', attr: 'onclick', value: 'a' }] } } }, /x.*scope.*not a data- attribute/],
+    ['no value', { variants: { x: { label: 'x', changes: [{ selector: 'html', kind: 'attr', attr: 'data-hero' }] } } }, /needs attr/],
+    ['same attribute twice', { variants: { x: { label: 'x', changes: [
+      { selector: 'html', kind: 'attr', attr: 'data-hero', value: 'a' },
+      { selector: 'html', kind: 'attr', attr: 'data-hero', value: 'b' },
+    ] } } }, /same place twice/],
+  ];
+  for (const [name, over, re] of cases) {
+    const res = await handleAdmin(adminReq('POST', '/experiments', heroSwitch(over)), env.ctx);
+    const body = (await res.json()) as { errors: string[] };
+    assert.equal(res.status, 422, name);
+    assert.ok(body.errors.some((e) => re.test(e)), `${name}: ${body.errors.join(' | ')}`);
+  }
+  const slotCases: Array<[string, Record<string, unknown>, RegExp]> = [
+    ['attr without a list', { attrs: undefined }, /attrs is required/],
+    ['a non data- attribute allowed', { attrs: { onclick: ['x'] } }, /only data- attributes/],
+    ['bad values listed', { attrs: { 'data-hero': ['a b'] } }, /plain values/],
+    ['empty list', { attrs: { 'data-hero': [] } }, /plain values/],
+    ['attrs on a slot that does not switch', { kinds: ['text'] }, /only makes sense/],
+  ];
+  for (const [name, slot, re] of slotCases) {
+    const res = await handleAdmin(adminReq('POST', '/experiments', heroSwitch({}, slot)), env.ctx);
+    const body = (await res.json()) as { errors: string[] };
+    assert.equal(res.status, 422, name);
+    assert.ok(body.errors.some((e) => re.test(e)), `${name}: ${body.errors.join(' | ')}`);
+  }
   assert.equal((await env.ctx.store.listAll()).length, 0, 'nothing is stored');
 });
 

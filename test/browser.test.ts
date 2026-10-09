@@ -16,6 +16,7 @@ const CHROME = process.env.HONE_TEST_CHROME;
 const skip = CHROME ? false : 'Set HONE_TEST_CHROME to a Chrome or Chromium program to run the browser tests';
 
 const EXP = 'exp_browser01';
+const EXP2 = 'exp_browser02';
 const html = readFileSync(new URL('./support/page.html', import.meta.url), 'utf8');
 
 const listen = (server: Server): Promise<number> => new Promise((resolve) => server.listen(0, '127.0.0.1', () => resolve((server.address() as { port: number }).port)));
@@ -44,11 +45,11 @@ test('the browser script, in a real browser, against the real handlers', { skip 
   });
   apiPort = await listen(slowApi);
 
-  const siteHtml = (extra = '') => html.replace('<!--HONE-->', `<script src="http://127.0.0.1:${apiPort}/agent.js" data-experiment="${EXP}" data-hide=".hero-title,.hero-cta" ${extra}></script>`);
+  const siteHtml = (extra = '', key = EXP, hide = '.hero-title,.hero-cta') => html.replace('<!--HONE-->', `<script src="http://127.0.0.1:${apiPort}/agent.js" data-experiment="${key}" data-hide="${hide}" ${extra}></script>`);
   const site = createServer((req, res) => {
     const path = (req.url ?? '/').split('?')[0];
-    if (path === '/' || path === '/other' || path === '/down' || path === '/index.html') {
-      const body = path === '/down' ? siteHtml('data-api="http://127.0.0.1:9"') : siteHtml();
+    if (path === '/' || path === '/other' || path === '/down' || path === '/index.html' || path === '/switch') {
+      const body = path === '/down' ? siteHtml('data-api="http://127.0.0.1:9"') : path === '/switch' ? siteHtml('', EXP2, '.hero-a,.hero-b') : siteHtml();
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return void res.end(body);
     }
@@ -188,6 +189,51 @@ test('the browser script, in a real browser, against the real handlers', { skip 
     assert.equal(await visible(p, 'h1.hero-title'), true, 'the page is still shown');
     await until(async () => (await measure()).variants.v4.errors >= 1);
     assert.equal((await measure()).variants.v4.views, 1);
+  });
+
+  await t.test('switching a data- attribute (one hero for another): the answer is applied, the hidden hero stays hidden, and a click on the shown hero is the goal', async () => {
+    const made = await handleAdmin(
+      adminReq('POST', '/experiments', experimentBody({
+        id: EXP2,
+        allowedOrigins: [siteUrl],
+        target: { path: '/switch' },
+        goal: { type: 'click', selector: '.go-a, .go-b' },
+        policy: { ...policy, slots: { html: { kinds: ['attr'], attrs: { 'data-hero': ['a', 'b'] } } } },
+        variants: { 'hero-a': { label: 'Hero A', changes: [{ selector: 'html', kind: 'attr', attr: 'data-hero', value: 'a' }] } },
+        config: { canaryShare: 0.5 },
+      })),
+      ctx,
+    );
+    assert.equal(made.status, 201, await made.clone().text());
+    const view2 = viewFromState(EXP2, ['original', 'hero-a'], (await ctx.store.getExperiment(EXP2))!.state, false);
+    const idFor2 = (variant: string): string => {
+      for (let i = 0; ; i++) {
+        const id = `browser-switch-${variant}-${i}`;
+        if (chooseVariant(view2, id) === variant) return id;
+      }
+    };
+    const shown = (p: Page, sel: string) => p.eval<boolean>(`getComputedStyle(document.querySelector(${JSON.stringify(sel)})).display !== 'none'`);
+
+    const a = await open({ visitor: idFor2('hero-a') });
+    await a.goto(`${siteUrl}/switch`);
+    await a.waitFor('window.__hone');
+    assert.equal((await hone(a))?.variant, 'hero-a');
+    assert.equal((await hone(a))?.applyFailed, false);
+    assert.equal(await a.eval('document.documentElement.dataset.hero'), 'a');
+    assert.equal(await shown(a, '.hero-a'), true);
+    assert.equal(await shown(a, '.hero-b'), false);
+    await a.eval('document.querySelector(".go-a").addEventListener("click", e => e.preventDefault()); document.querySelector(".go-a").click()');
+    await until(async () => (await ctx.store.getVisitor(EXP2, idFor2('hero-a')))?.convertedAt != null);
+
+    const o = await open({ visitor: idFor2('original') });
+    await o.goto(`${siteUrl}/switch`);
+    await o.waitFor('window.__hone');
+    assert.equal((await hone(o))?.variant, 'original');
+    assert.equal(await o.eval('document.documentElement.dataset.hero'), 'b', 'the page keeps the hero it started with');
+    assert.equal(await shown(o, '.hero-b'), true);
+    assert.equal(await shown(o, '.hero-a'), false);
+    await o.eval('document.querySelector(".go-b").addEventListener("click", e => e.preventDefault()); document.querySelector(".go-b").click()');
+    await until(async () => (await ctx.store.getVisitor(EXP2, idFor2('original')))?.convertedAt != null);
   });
 
   await t.test('Global Privacy Control: the page is left alone and nothing is stored, not even an id', async () => {

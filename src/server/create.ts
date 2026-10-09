@@ -1,4 +1,4 @@
-import { checkVariant } from '../safety/policy.ts';
+import { ATTR_NAME_RE, ATTR_VALUE_RE, checkVariant } from '../safety/policy.ts';
 import type { Policy } from '../safety/policy.ts';
 import { makeConfig } from '../core/types.ts';
 import type { Config, DeepPartial } from '../core/types.ts';
@@ -14,7 +14,7 @@ const isStr = (x: unknown, min = 0, max = 500): x is string => typeof x === 'str
 const isNum = (x: unknown): x is number => typeof x === 'number' && Number.isFinite(x);
 const strings = (x: unknown, max = 100): x is string[] => Array.isArray(x) && x.length <= max && x.every((s) => isStr(s, 1, 300));
 
-const KINDS = ['text', 'order', 'style'];
+const KINDS = ['text', 'order', 'style', 'attr'];
 const STYLE_KEYS = ['color', 'background', 'fontFamily', 'fontSizePx'];
 const ORIGIN_RE = /^https?:\/\/[A-Za-z0-9.-]+(:\d{1,5})?$/;
 
@@ -79,6 +79,27 @@ function configOverrides(input: unknown, errors: string[]): DeepPartial<Config> 
   return walk(input, base, '') as DeepPartial<Config>;
 }
 
+/** A slot that allows "attr" must say which attributes and which values. Without that list, nothing can be set. */
+function parseAttrs(sel: string, slot: Obj, errors: string[]): void {
+  const where = `policy.slots["${sel}"].attrs`;
+  const wantsAttr = (slot.kinds as unknown[]).includes('attr');
+  if (slot.attrs === undefined) {
+    if (wantsAttr) errors.push(`${where} is required when kinds includes attr`);
+    return;
+  }
+  if (!wantsAttr) errors.push(`${where} only makes sense when kinds includes attr`);
+  if (!isObj(slot.attrs) || Object.keys(slot.attrs).length === 0 || Object.keys(slot.attrs).length > 5) {
+    errors.push(`${where} must list 1 to 5 attributes`);
+    return;
+  }
+  for (const [name, values] of Object.entries(slot.attrs)) {
+    if (!ATTR_NAME_RE.test(name)) errors.push(`${where}.${name}: only data- attributes can be allowed`);
+    else if (!Array.isArray(values) || values.length === 0 || values.length > 10 || !values.every((v) => typeof v === 'string' && ATTR_VALUE_RE.test(v))) {
+      errors.push(`${where}.${name} must list 1 to 10 plain values (letters, digits, - or _)`);
+    }
+  }
+}
+
 function parsePolicy(x: unknown, errors: string[]): Policy | null {
   const before = errors.length;
   if (!isObj(x)) {
@@ -89,8 +110,9 @@ function parsePolicy(x: unknown, errors: string[]): Policy | null {
   if (!isObj(slots) || Object.keys(slots).length === 0) errors.push('policy.slots must list the places that may change');
   else {
     for (const [sel, s] of Object.entries(slots)) {
-      if (!isObj(s) || !Array.isArray(s.kinds) || s.kinds.length === 0 || !s.kinds.every((k) => KINDS.includes(k as string))) errors.push(`policy.slots["${sel}"].kinds must be some of text, order, style`);
+      if (!isObj(s) || !Array.isArray(s.kinds) || s.kinds.length === 0 || !s.kinds.every((k) => KINDS.includes(k as string))) errors.push(`policy.slots["${sel}"].kinds must be some of text, order, style, attr`);
       else if (s.maxChars !== undefined && !isNum(s.maxChars)) errors.push(`policy.slots["${sel}"].maxChars must be a number`);
+      else parseAttrs(sel, s, errors);
     }
   }
   if (!strings(neverChange)) errors.push('policy.neverChange must be a list of words');
@@ -108,9 +130,12 @@ function parseChange(x: unknown, where: string, errors: string[]): Change | null
     return null;
   }
   if (!isStr(x.selector, 1, 200) || /[<>{}]/.test(x.selector)) errors.push(`${where}.selector is missing or not a plain selector`);
-  if (!KINDS.includes(x.kind as string)) errors.push(`${where}.kind must be text, order or style`);
+  if (!KINDS.includes(x.kind as string)) errors.push(`${where}.kind must be text, order, style or attr`);
   const ctx = x.context;
-  if (!isObj(ctx) || !isStr(ctx.color, 1, 40) || !isStr(ctx.background, 1, 40) || !isNum(ctx.fontSizePx)) errors.push(`${where}.context needs color, background and fontSizePx (how the element looks today)`);
+  if (x.kind !== 'attr' && (!isObj(ctx) || !isStr(ctx.color, 1, 40) || !isStr(ctx.background, 1, 40) || !isNum(ctx.fontSizePx))) {
+    errors.push(`${where}.context needs color, background and fontSizePx (how the element looks today)`);
+  }
+  if (x.kind === 'attr' && (!isStr(x.attr, 1, 60) || !isStr(x.value, 1, 32))) errors.push(`${where} needs attr (a data- attribute name) and value`);
   if (x.kind === 'text' && !isStr(x.text, 1, 500)) errors.push(`${where}.text is missing`);
   if (x.kind === 'style') {
     if (!isObj(x.style) || Object.keys(x.style).length === 0) errors.push(`${where}.style is missing`);
@@ -180,7 +205,7 @@ export function validateNewExperiment(input: unknown): Created {
         const parsed = parseChange(c, `variants.${vid}.changes[${i}]`, errors);
         if (parsed) changes.push(parsed);
       });
-      const selectors = changes.map((c) => `${c.selector}|${c.kind}`);
+      const selectors = changes.map((c) => `${c.selector}|${c.kind}|${c.kind === 'attr' ? c.attr : ''}`);
       if (new Set(selectors).size !== selectors.length) errors.push(`variants.${vid} changes the same place twice`);
       variants[vid] = { label: raw.label, changes };
       order.push(vid);

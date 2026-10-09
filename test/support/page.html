@@ -4,11 +4,15 @@
   <meta charset="utf-8">
   <title>Fixture page</title>
   <style>body{font-family:sans-serif;margin:2rem} .hero-title{font-size:48px;color:#14202B} .hero-cta{display:inline-block;padding:12px 20px;background:#C8381A;color:#fff;font-size:18px}</style>
+  <style>html[data-hero="b"] .hero-a{display:none} html:not([data-hero="b"]) .hero-b{display:none}</style>
+  <script>document.documentElement.dataset.hero = 'b'</script>
   <!--HONE-->
 </head>
 <body>
   <h1 class="hero-title">Learn to work<br>with AI today</h1>
   <p><a class="hero-cta" href="#courses">Choose a course</a></p>
+  <section class="hero-a"><a class="go-a" href="#a">Hero A button</a></section>
+  <section class="hero-b"><a class="go-b" href="#b">Hero B button</a></section>
   <ul class="cards" id="courses">
     <li data-hone-key="starter">Starter</li>
     <li data-hone-key="popular">Popular</li>

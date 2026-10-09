@@ -4,9 +4,17 @@ import { contrastRatio, normalizeHex, requiredContrast } from './contrast.ts';
  * Rules a person sets once per site. The agent can read them but never change them.
  * Every variant must pass `checkVariant` before it gets any traffic.
  */
+/** One place the agent may touch. */
+export interface Slot {
+  kinds: Array<'text' | 'order' | 'style' | 'attr'>;
+  maxChars?: number;
+  /** For kind "attr": which attributes may be set here, and the only values each may take. Names start with data-. */
+  attrs?: Record<string, string[]>;
+}
+
 export interface Policy {
   /** The only places the agent may touch, and what it may do in each. */
-  slots: Record<string, { kinds: Array<'text' | 'order' | 'style'>; maxChars?: number }>;
+  slots: Record<string, Slot>;
   /** Selectors containing any of these words are never touched, even if someone allowlists them by mistake. */
   neverChange: string[];
   facts: {
@@ -26,15 +34,22 @@ export interface Policy {
 
 export interface Proposal {
   selector: string;
-  kind: 'text' | 'order' | 'style';
+  kind: 'text' | 'order' | 'style' | 'attr';
   text?: string;
+  /** For kind "attr": a data- attribute and one of the values the policy lists for it. */
+  attr?: string;
+  value?: string;
   /** For kind "order": the new order, and the order the page has today. */
   order?: string[];
   originalOrder?: string[];
   style?: { color?: string; background?: string; fontFamily?: string; fontSizePx?: number };
-  /** How the element looks today, used to check contrast when the proposal changes only some of it. */
-  context: { color: string; background: string; fontSizePx: number; bold?: boolean };
+  /** How the element looks today, used to check contrast when the proposal changes only some of it. Not needed for kind "attr" or "order". */
+  context?: { color: string; background: string; fontSizePx: number; bold?: boolean };
 }
+
+/** Attribute names an experiment may set: data- attributes only, so nothing that loads, runs or links can be switched. */
+export const ATTR_NAME_RE = /^data-[a-z][a-z0-9-]{0,40}$/;
+export const ATTR_VALUE_RE = /^[A-Za-z0-9_-]{1,32}$/;
 
 export type CheckName = 'scope' | 'facts' | 'brand' | 'readability' | 'honesty';
 
@@ -101,6 +116,17 @@ export function checkVariant(p: Proposal, policy: Policy): CheckResult {
     if (p.text && /[<>]/.test(p.text)) fail('scope', 'text contains markup');
     if (p.text && /(?:https?:\/\/|www\.|href\s*=|\bmailto:)/i.test(p.text)) fail('scope', 'text contains a link');
   }
+  if (p.kind === 'attr') {
+    const name = p.attr ?? '';
+    const value = p.value ?? '';
+    if (!ATTR_NAME_RE.test(name)) fail('scope', `"${name}" is not a data- attribute`);
+    else {
+      const allowedValues = slot?.attrs?.[name];
+      if (slot && !allowedValues) fail('scope', `${p.selector} does not allow changing ${name}`);
+      else if (allowedValues && !ATTR_VALUE_RE.test(value)) fail('scope', `"${value}" is not a plain value`);
+      else if (allowedValues && !allowedValues.includes(value)) fail('scope', `${name}="${value}" is not one of the values you allowed (${allowedValues.join(', ')})`);
+    }
+  }
   if (p.kind === 'order') {
     const o = p.order ?? [];
     const orig = p.originalOrder ?? [];
@@ -141,8 +167,12 @@ export function checkVariant(p: Proposal, policy: Policy): CheckResult {
     if (slot?.maxChars !== undefined && text.length > slot.maxChars) fail('readability', `${text.length} characters, over the ${slot.maxChars} that fit`);
   }
 
+  // Text and style changes are judged against how the element looks today.
+  const ctx = p.context;
+  if ((p.kind === 'style' || p.kind === 'text') && !ctx) fail('readability', 'does not say how the element looks today (context), so contrast cannot be checked');
+
   // 3. Brand tokens and 4. contrast, for style changes
-  if (p.kind === 'style' && p.style) {
+  if (p.kind === 'style' && p.style && ctx) {
     const colors = policy.brand.colors.map((c) => normalizeHex(c));
     for (const key of ['color', 'background'] as const) {
       const v = p.style[key];
@@ -153,15 +183,15 @@ export function checkVariant(p: Proposal, policy: Policy): CheckResult {
     if (p.style.fontFamily !== undefined && !policy.brand.fonts.some((f) => f.toLowerCase() === p.style!.fontFamily!.toLowerCase())) {
       fail('brand', `font ${p.style.fontFamily} is not one of your brand fonts`);
     }
-    const size = p.style.fontSizePx ?? p.context.fontSizePx;
+    const size = p.style.fontSizePx ?? ctx.fontSizePx;
     if (size < policy.brand.minFontPx || size > policy.brand.maxFontPx) fail('brand', `${size}px is outside ${policy.brand.minFontPx} to ${policy.brand.maxFontPx}px`);
   }
-  if (p.kind === 'style' || p.kind === 'text') {
-    const fg = p.style?.color ?? p.context.color;
-    const bg = p.style?.background ?? p.context.background;
+  if ((p.kind === 'style' || p.kind === 'text') && ctx) {
+    const fg = p.style?.color ?? ctx.color;
+    const bg = p.style?.background ?? ctx.background;
     if (normalizeHex(fg) && normalizeHex(bg)) {
       const ratio = contrastRatio(fg, bg);
-      const need = requiredContrast(p.style?.fontSizePx ?? p.context.fontSizePx, p.context.bold ?? false);
+      const need = requiredContrast(p.style?.fontSizePx ?? ctx.fontSizePx, ctx.bold ?? false);
       if (ratio < need) fail('readability', `contrast ${ratio.toFixed(1)}:1 is below the ${need}:1 minimum`);
     }
   }
