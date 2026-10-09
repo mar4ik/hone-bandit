@@ -1,0 +1,59 @@
+{
+  "id": "exp_aiqb_hero_demo",
+  "name": "AIQB home page: hero words",
+  "hide": ".story-hero__title,.story-hero__lead,.story-hero__actions .btn",
+  "target": { "path": "/" },
+  "goal": { "type": "click", "selector": ".story-hero__actions .btn" },
+  "policy": {
+    "slots": {
+      ".story-hero__title": { "kinds": ["text"], "maxChars": 60 },
+      ".story-hero__lead": { "kinds": ["text"], "maxChars": 90 },
+      ".story-hero__actions .btn": { "kinds": ["text"], "maxChars": 28 }
+    },
+    "neverChange": ["price", "legal", "consent", "form", "checkout", "cookie", "payment", "endorse", "bubble"],
+    "facts": { "numbers": ["3 MacBook", "19,500", "100%"], "claims": [] },
+    "brand": {
+      "colors": ["#1E66EE", "#FF5E16", "#000000", "#1E1E21", "#D1D1D1", "#FFFFFF", "#00C4B1", "#FFCA53", "#A2D4FF", "#FFB0E8", "#6868E4", "#BD8164"],
+      "fonts": ["Adelle Sans ARM"],
+      "minFontPx": 14,
+      "maxFontPx": 192,
+      "forbiddenWords": []
+    }
+  },
+  "variants": {
+    "v1": {
+      "label": "Headline without «today»",
+      "changes": [
+        {
+          "selector": ".story-hero__title",
+          "kind": "text",
+          "text": "Սովորի՛ր աշխատել\nAI-ի հետ",
+          "context": { "color": "#FFFFFF", "background": "#000000", "fontSizePx": 64, "bold": true }
+        }
+      ]
+    },
+    "v2": {
+      "label": "Button: «See the courses»",
+      "changes": [
+        {
+          "selector": ".story-hero__actions .btn",
+          "kind": "text",
+          "text": "Տեսնել դասընթացները",
+          "context": { "color": "#FFFFFF", "background": "#1E66EE", "fontSizePx": 16, "bold": true }
+        }
+      ]
+    },
+    "v3": {
+      "label": "Lead: «take part in the MacBook draw»",
+      "changes": [
+        {
+          "selector": ".story-hero__lead",
+          "kind": "text",
+          "text": "Գրանցվիր հիմա՝ մասնակցիր MacBook-ի խաղարկությանը",
+          "context": { "color": "#FFFFFF", "background": "#000000", "fontSizePx": 28, "bold": true }
+        }
+      ]
+    }
+  },
+  "config": { "canaryShare": 0.2 }
+}
