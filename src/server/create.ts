@@ -183,6 +183,12 @@ export function validateNewExperiment(input: unknown): Created {
     errors.push('allowedOrigins must list 1 to 10 sites like https://example.com (no path)');
   }
 
+  let hide: string | undefined;
+  if (input.hide !== undefined) {
+    if (isStr(input.hide, 0, 300) && !/["'<>{};\\]/.test(input.hide)) hide = input.hide.trim() || undefined;
+    else errors.push('hide must be plain selectors separated by commas (up to 300 characters)');
+  }
+
   const policy = parsePolicy(input.policy, errors);
   const overrides = configOverrides(input.config, errors);
 
@@ -226,6 +232,6 @@ export function validateNewExperiment(input: unknown): Created {
   const config = makeConfig(id, overrides);
   return {
     ok: true,
-    def: { id, name, order, variants, target, goal, allowedOrigins: origins as string[], policy, config },
+    def: { id, name, order, variants, target, goal, allowedOrigins: origins as string[], ...(hide ? { hide } : {}), policy, config },
   };
 }

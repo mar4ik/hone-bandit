@@ -103,6 +103,35 @@ test('switching attributes is refused unless the policy lists the attribute and 
   assert.equal((await env.ctx.store.listAll()).length, 0, 'nothing is stored');
 });
 
+test('the hide selectors are kept with the experiment and shown again by the status endpoint', async () => {
+  const env = makeCtx();
+  const made = await handleAdmin(adminReq('POST', '/experiments', experimentBody({ hide: '.hero-title, .hero-cta' })), env.ctx);
+  assert.equal(made.status, 201);
+  const shown = (await (await handleAdmin(adminReq('GET', `/experiments/${EXP}`), env.ctx)).json()) as { hide: string | null };
+  assert.equal(shown.hide, '.hero-title, .hero-cta');
+  const none = makeCtx();
+  await handleAdmin(adminReq('POST', '/experiments', experimentBody()), none.ctx);
+  assert.equal(((await (await handleAdmin(adminReq('GET', `/experiments/${EXP}`), none.ctx)).json()) as { hide: string | null }).hide, null, 'older experiments and those without it');
+  for (const bad of ['a"b', '<script>', 'a{color:red}', 'x'.repeat(301), 42]) {
+    const res = await handleAdmin(adminReq('POST', '/experiments', experimentBody({ hide: bad })), makeCtx().ctx);
+    assert.equal(res.status, 422, String(bad));
+    assert.ok(((await res.json()) as { errors: string[] }).errors.some((e) => /hide/.test(e)));
+  }
+});
+
+test('the status endpoint says what each version changes, so a screen can show it', async () => {
+  const env = makeCtx();
+  await handleAdmin(adminReq('POST', '/experiments', experimentBody()), env.ctx);
+  const shown = (await (await handleAdmin(adminReq('GET', `/experiments/${EXP}`), env.ctx)).json()) as { variants: Array<{ id: string; label: string; changes: Array<{ selector: string; kind: string; text?: string }> }> };
+  const by = Object.fromEntries(shown.variants.map((v) => [v.id, v]));
+  assert.deepEqual(by.original.changes, [], 'the original changes nothing');
+  assert.equal(by.original.label, 'Original');
+  assert.equal(by.v1.label, 'Shorter headline');
+  assert.equal(by.v1.changes.length, 1);
+  assert.equal(by.v1.changes[0].selector, 'h1.hero-title');
+  assert.equal(by.v1.changes[0].text, 'Learn AI without the jargon');
+});
+
 test('creation checks the shape of everything it is given', async () => {
   const env = makeCtx();
   const cases: Array<[string, Record<string, unknown>, RegExp]> = [

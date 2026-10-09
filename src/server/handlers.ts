@@ -235,8 +235,14 @@ async function status(ctx: Ctx, row: ExperimentRow, now: number) {
     target: row.def.target,
     goal: row.def.goal,
     allowedOrigins: row.def.allowedOrigins,
+    hide: row.def.hide ?? null,
     ...snap,
-    variants: snap.variants.map((v) => ({ ...v, label: v.id === CONTROL_ID ? 'Original' : row.def.variants[v.id].label })),
+    variants: snap.variants.map((v) => ({
+      ...v,
+      label: v.id === CONTROL_ID ? 'Original' : row.def.variants[v.id].label,
+      /** What the version changes on the page. Empty for the original. */
+      changes: v.id === CONTROL_ID ? [] : row.def.variants[v.id].changes,
+    })),
     /** Counts so far, including visitors whose window has not closed. The numbers above only include closed ones. */
     progress: await ctx.store.progress(row.def.id),
     audit: await ctx.store.readAudit(row.def.id, 100),
