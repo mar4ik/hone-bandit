@@ -1,0 +1,19 @@
+{
+  "name": "hone-bandit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Hone: an agent that tests and improves any website with a multi-armed bandit.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "sim": "node src/sim/run.ts",
+    "typecheck": "tsc -p ."
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^22.0.0"
+  }
+}

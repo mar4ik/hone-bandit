@@ -1,0 +1,100 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-09T09:55:00Z"
+  },
+  "title": "Bandit Agent App \u2014 UI Mocks",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1360,
+      "h": 2060,
+      "title": "A \u00b7 Ledger: Connect a site",
+      "expand": "fill"
+    },
+    "Ledger-Activity.dc.html": {
+      "x": 1440,
+      "y": 0,
+      "w": 1360,
+      "h": 1920,
+      "title": "A \u00b7 Ledger: What the agent did",
+      "expand": "fill"
+    },
+    "Notes-Connect.dc.html": {
+      "x": 0,
+      "y": 2540,
+      "w": 1360,
+      "h": 1300,
+      "title": "B \u00b7 Field notes: Connect a site",
+      "expand": "fill"
+    },
+    "Notes-Activity.dc.html": {
+      "x": 1440,
+      "y": 2540,
+      "w": 1360,
+      "h": 1500,
+      "title": "B \u00b7 Field notes: What the agent did",
+      "expand": "fill"
+    },
+    "Mission-Connect.dc.html": {
+      "x": 0,
+      "y": 4620,
+      "w": 1360,
+      "h": 1300,
+      "title": "C \u00b7 Mission control: Connect a site",
+      "expand": "fill"
+    },
+    "Mission-Activity.dc.html": {
+      "x": 1440,
+      "y": 4620,
+      "w": 1360,
+      "h": 1500,
+      "title": "C \u00b7 Mission control: What the agent did",
+      "expand": "fill"
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Ledger-Activity.dc.html",
+    "Notes-Connect.dc.html",
+    "Notes-Activity.dc.html",
+    "Mission-Connect.dc.html",
+    "Mission-Activity.dc.html"
+  ],
+  "notes": {
+    "dirA": {
+      "x": 0,
+      "y": -260,
+      "text": "A \u00b7 Ledger: table-first, serif figures, one vermilion accent",
+      "kind": "title1",
+      "maxW": 2800
+    },
+    "dirB": {
+      "x": 0,
+      "y": 2280,
+      "text": "B \u00b7 Field notes: the agent tells you what it did, in plain sentences",
+      "kind": "title1",
+      "maxW": 2800
+    },
+    "dirC": {
+      "x": 0,
+      "y": 4360,
+      "text": "C \u00b7 Mission control: every variant on its lifecycle lane",
+      "kind": "title1",
+      "maxW": 2800
+    },
+    "sample": {
+      "x": 2900,
+      "y": 0,
+      "text": "All names, copy and numbers are sample data for the mock.",
+      "w": 320
+    }
+  },
+  "designSystems": []
+}

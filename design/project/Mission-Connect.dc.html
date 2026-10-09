@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mission control: Connect a site</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3DD68C}a:hover{color:#E8ECF1}
+</style>
+</helmet>
+<div style="background: #0D1117; color: #E8ECF1; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 1.5; min-height: 1300px; box-sizing: border-box">
+
+<div style="border-bottom: 1px solid #2B3441">
+<div style="max-width: 1280px; margin: 0 auto; padding: 14px 40px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 32px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px">
+<div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em">Bandit Agent</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #A3AEBC">Sites / New site</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-size: 14px; font-weight: 500">
+<a href="#" style="text-decoration: none; color: #A3AEBC">Sites</a>
+<a href="#" style="text-decoration: none; color: #A3AEBC">Activity</a>
+<a href="#" style="text-decoration: none; color: #A3AEBC">Rules</a>
+<span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC; border: 1px solid #2B3441; padding: 1px 8px; border-radius: 4px">Sample data</span>
+</div>
+</div>
+</div>
+
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 40px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #3DD68C">PRE-FLIGHT</div>
+<h1 style="margin: 0; font-size: 40px; line-height: 1.1; font-weight: 600; letter-spacing: -0.03em">Connect example-courses.com</h1>
+<p style="margin: 0; font-size: 17px; color: #A3AEBC; max-width: 640px">Four checks before launch. The agent can&#39;t go live until every required check is green.</p>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+
+<!-- Stepper -->
+<div style="flex: 1 1 200px; max-width: 240px; min-width: 0; display: flex; flex-direction: column">
+<div style="display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #2B3441"><span style="width: 22px; height: 22px; border-radius: 50%; background: #3DD68C; color: #08140E; display: inline-flex; align-items: center; justify-content: center; flex: none"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#08140E" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg></span><span style="display: flex; flex-direction: column"><span style="font-weight: 500">Site</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">DONE</span></span></div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #2B3441"><span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #F5A524; box-sizing: border-box; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 600">Install</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #F5A524">WAITING FOR VISITOR</span></span></div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #2B3441"><span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #4A5565; box-sizing: border-box; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 500; color: #A3AEBC">Goal</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">SUGGESTED</span></span></div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #2B3441"><span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #4A5565; box-sizing: border-box; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 500; color: #A3AEBC">Places</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">2 OF 3 SELECTED</span></span></div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #2B3441"><span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #4A5565; box-sizing: border-box; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 500; color: #A3AEBC">Rules</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">DEFAULTS</span></span></div>
+<div style="display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid #2B3441; border-bottom: 1px solid #2B3441"><span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #4A5565; box-sizing: border-box; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-weight: 500; color: #A3AEBC">Launch</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">LOCKED</span></span></div>
+</div>
+
+<!-- Steps -->
+<div style="flex: 999 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px"><span style="font-weight: 600">1. Site</span><span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #A3AEBC">https://www.example-courses.com</span><span style="font-size: 14px; color: #A3AEBC">14 pages, static HTML</span></div>
+<a href="#" style="font-size: 14px; font-weight: 500">Edit</a>
+</div>
+
+<div style="background: #151B23; border: 1px solid #F5A524; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 18px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px"><h2 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.02em">2. Install</h2><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #F5A524">REQUIRED</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px; padding: 4px; background: #0D1117; border: 1px solid #2B3441; border-radius: 8px; align-self: flex-start">
+<button type="button" style="height: 40px; padding: 0 16px; border: 1px solid #3A4657; border-radius: 6px; background: #232C38; color: #E8ECF1; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer">Script tag</button>
+<button type="button" style="height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #A3AEBC; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer">Tag manager</button>
+<button type="button" style="height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #A3AEBC; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer">Single-page app</button>
+<button type="button" style="height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #A3AEBC; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer">Edge worker</button>
+<button type="button" style="height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #A3AEBC; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer">Server SDK</button>
+</div>
+<div style="font-size: 15px; color: #A3AEBC">Paste in the head of every page, before your other scripts. Works on any HTML site.</div>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start">
+<div style="flex: 1 1 360px; min-width: 0; background: #0A0E13; border: 1px solid #2B3441; border-radius: 8px; padding: 16px 18px; font-family: 'Geist Mono', monospace; font-size: 13px; line-height: 1.6; color: #E8ECF1; overflow-x: auto; white-space: pre">&lt;script src="https://[AGENT HOST]/agent.js"
+        data-site="[SITE KEY]" async&gt;&lt;/script&gt;</div>
+<button type="button" style="height: 44px; padding: 0 20px; border: 1px solid #3A4657; border-radius: 8px; background: #232C38; color: #E8ECF1; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer">Copy</button>
+</div>
+<div style="background: #0A0E13; border: 1px solid #2B3441; border-radius: 8px; padding: 14px 18px; font-family: 'Geist Mono', monospace; font-size: 13px; line-height: 1.7; display: flex; flex-direction: column">
+<div style="color: #A3AEBC">listening on example-courses.com</div>
+<div style="color: #F5A524">waiting for first page view_</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center"><button type="button" style="height: 44px; padding: 0 20px; border: 1px solid #3A4657; border-radius: 8px; background: transparent; color: #E8ECF1; font-family: 'Geist', system-ui, sans-serif; font-size: 14px; font-weight: 600; cursor: pointer">Check again</button><span style="font-size: 14px; color: #A3AEBC">Open your site in a new tab to send the first page view.</span></div>
+</div>
+
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px"><span style="font-weight: 600; color: #A3AEBC">3. Goal</span><span style="font-family: 'Geist Mono', monospace; font-size: 13px">purchase_completed</span><span style="font-size: 14px; color: #A3AEBC">counted within 7 days of the visit</span></div>
+<a href="#" style="font-size: 14px; font-weight: 500">Change</a>
+</div>
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px"><span style="font-weight: 600; color: #A3AEBC">4. Places</span><span style="font-size: 14px">Hero headline, hero button</span><span style="font-size: 14px; color: #A3AEBC">Course card order is off</span></div>
+<a href="#" style="font-size: 14px; font-weight: 500">Change</a>
+</div>
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px"><span style="font-weight: 600; color: #A3AEBC">5. Rules</span><a href="#" style="font-size: 14px; font-weight: 500">Change</a></div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="font-size: 13px; padding: 3px 10px; border: 1px solid #2B3441; border-radius: 99px; color: #A3AEBC">Facts: none</span>
+<span style="font-size: 13px; padding: 3px 10px; border: 1px solid #2B3441; border-radius: 99px; color: #A3AEBC">Brand: 6 colours, 2 fonts</span>
+<span style="font-size: 13px; padding: 3px 10px; border: 1px solid #2B3441; border-radius: 99px; color: #A3AEBC">Consent: on</span>
+<span style="font-size: 13px; padding: 3px 10px; border: 1px solid #2B3441; border-radius: 99px; color: #A3AEBC">Human review: off</span>
+<span style="font-size: 13px; padding: 3px 10px; border: 1px solid #2B3441; border-radius: 99px; color: #A3AEBC">Locked: prices, legal text, forms, outside links</span>
+</div>
+</div>
+
+</div>
+
+<!-- Pre-flight -->
+<div style="flex: 1 1 280px; max-width: 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px; position: relative">
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-bottom: 10px"><h2 style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Pre-flight</h2><span style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #A3AEBC">3 OF 4</span></div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid #2B3441; font-size: 14px"><span style="color: #3DD68C; font-family: 'Geist Mono', monospace; font-weight: 500; width: 40px; flex: none">PASS</span>Site reachable</div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid #2B3441; font-size: 14px"><span style="color: #3DD68C; font-family: 'Geist Mono', monospace; font-weight: 500; width: 40px; flex: none">PASS</span>Goal event seen on site</div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid #2B3441; font-size: 14px"><span style="color: #3DD68C; font-family: 'Geist Mono', monospace; font-weight: 500; width: 40px; flex: none">PASS</span>One place or more selected</div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid #2B3441; font-size: 14px"><span style="color: #F5A524; font-family: 'Geist Mono', monospace; font-weight: 500; width: 40px; flex: none">WAIT</span>Install verified</div>
+<div style="display: flex; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid #2B3441; border-bottom: 1px solid #2B3441; font-size: 14px"><span style="color: #A3AEBC; font-family: 'Geist Mono', monospace; font-weight: 500; width: 40px; flex: none">OPT</span><span style="color: #A3AEBC">Facts file added</span></div>
+<div style="padding-top: 14px; font-size: 14px; color: #A3AEBC">Optional checks never block launch. Without facts, variants can&#39;t mention numbers.</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" disabled style="height: 52px; border: 1px solid #2B3441; border-radius: 8px; background: #1B222C; color: #8A95A3; font-family: 'Geist', system-ui, sans-serif; font-size: 16px; font-weight: 600; cursor: not-allowed">Launch: start learning</button>
+<div style="font-size: 13px; color: #A3AEBC">Unlocks when the install is verified. Starts in warm-up with an equal split.</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1300}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

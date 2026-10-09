@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ledger: What the agent did</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#14202B}
+</style>
+</helmet>
+<div style="background: #F6F6F1; color: #14202B; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; line-height: 1.5; min-height: 1920px; box-sizing: border-box">
+
+<div style="border-bottom: 1px solid #14202B">
+<div style="max-width: 1200px; margin: 0 auto; padding: 18px 40px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px">
+<div style="font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 600; letter-spacing: -0.01em">Bandit Agent</div>
+<nav style="display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 15px; font-weight: 500">
+<a href="#" style="text-decoration: none">Sites</a>
+<a href="#" style="text-decoration: none; border-bottom: 2px solid #14202B; padding-bottom: 2px">Activity</a>
+<a href="#" style="text-decoration: none">Rules</a>
+<a href="#" style="text-decoration: none">Settings</a>
+</nav>
+</div>
+</div>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 48px 40px 72px; box-sizing: border-box">
+
+<!-- Title + kill switch -->
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 40px; padding-bottom: 36px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #14202B; display: inline-block"></span>Learning</span>
+<span style="color: #4A5A68">example-courses.com, day 25</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #4A5A68; border: 1px solid #C9D1D4; padding: 1px 8px; border-radius: 2px">Sample data</span>
+</div>
+<h1 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 40px; line-height: 1.1; font-weight: 500; letter-spacing: -0.02em">Example Courses</h1>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+<button type="button" style="height: 48px; padding: 0 22px; border: 2px solid #C8381A; border-radius: 2px; background: transparent; color: #C8381A; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 600; cursor: pointer">Show the original to everyone</button>
+<div style="font-size: 13px; color: #4A5A68">Kill switch. Takes effect within about a minute.</div>
+</div>
+</div>
+
+<!-- Figures -->
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; border-top: 2px solid #14202B; border-bottom: 1px solid #C9D1D4">
+<div style="flex: 2 1 420px; padding: 28px 24px 28px 0; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'Newsreader', Georgia, serif; font-size: 128px; line-height: 0.95; font-weight: 500; letter-spacing: -0.04em; color: #14202B">+19%</div>
+<div style="font-size: 17px; font-weight: 600">Purchases per visitor since the agent started</div>
+<div style="font-size: 14px; color: #4A5A68">2.9% to 3.5%, from 3 confirmed changes</div>
+</div>
+<div style="flex: 1 1 200px; padding: 28px 24px; border-left: 1px solid #C9D1D4; display: flex; flex-direction: column; gap: 4px">
+<div style="font-family: 'Newsreader', Georgia, serif; font-size: 48px; line-height: 1; font-weight: 500; letter-spacing: -0.02em">4</div>
+<div style="font-weight: 600">Tests running now</div>
+<div style="font-size: 14px; color: #4A5A68">One in each of the first four stages</div>
+</div>
+<div style="flex: 1 1 200px; padding: 28px 0 28px 24px; border-left: 1px solid #C9D1D4; display: flex; flex-direction: column; gap: 4px">
+<div style="font-family: 'Newsreader', Georgia, serif; font-size: 48px; line-height: 1; font-weight: 500; letter-spacing: -0.02em">4</div>
+<div style="font-weight: 600">Variants stopped by safety</div>
+<div style="font-size: 14px; color: #4A5A68">Three never reached a visitor</div>
+</div>
+</div>
+
+<!-- Two columns -->
+<div style="display: flex; flex-wrap: wrap; gap: 48px 56px; padding-top: 44px; align-items: flex-start">
+
+<!-- Left -->
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 48px">
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 1px solid #14202B; padding-bottom: 10px">
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 28px; font-weight: 500; letter-spacing: -0.01em">Running now: hero headline</h2>
+<div style="font-size: 14px; color: #4A5A68">Round 5, shifting traffic toward what works</div>
+</div>
+<div style="overflow-x: auto">
+<div style="min-width: 640px; display: flex; flex-direction: column">
+<div style="display: grid; grid-template-columns: minmax(200px, 2fr) minmax(130px, 1.2fr) 80px 90px 80px; gap: 16px; padding: 6px 0 10px; font-size: 13px; color: #4A5A68; font-weight: 600">
+<div>Variant</div><div>Share of traffic</div><div style="text-align: right">Visitors</div><div style="text-align: right">Purchases</div><div style="text-align: right">Best?</div>
+</div>
+<sc-for list="{{variants}}" as="v" hint-placeholder-count="4">
+<div style="display: grid; grid-template-columns: minmax(200px, 2fr) minmax(130px, 1.2fr) 80px 90px 80px; gap: 16px; align-items: center; padding: 14px 0; border-top: 1px solid #E1E5E4">
+<div style="display: flex; gap: 10px; align-items: flex-start">
+<span style="width: 12px; height: 12px; margin-top: 5px; background: {{v.swatch}}; flex: none; display: inline-block"></span>
+<div><div style="font-weight: 600">{{v.name}}</div><div style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.3">{{v.text}}</div></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px"><div style="flex: 1 1 auto; height: 8px; background: #E1E5E4"><div style="height: 8px; background: {{v.swatch}}; width: {{v.share}}%"></div></div><div style="width: 36px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{v.share}}%</div></div>
+<div style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{v.visitors}}</div>
+<div style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{v.rate}}</div>
+<div style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500">{{v.best}}</div>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding-top: 12px">
+<div style="font-size: 14px; font-weight: 600">Share of traffic by day</div>
+<svg viewBox="0 0 640 210" style="width: 100%; max-width: 680px; height: auto; display: block" role="img" aria-label="Stacked areas of traffic share per variant over nine days. Variant 1 grows from 25 to 52 percent after day 4.">
+<g transform="translate(36 24)">
+<polygon points="0,160 0,120 65,120 130,120 195,121.6 260,124.8 325,126.4 390,128 455,129.6 520,131.2 520,160" fill="#A9B2B9" stroke="#F6F6F1" stroke-width="1"/>
+<polygon points="0,80 65,80 130,80 195,68.8 260,60.8 325,54.4 390,51.2 455,49.6 520,48 520,131.2 455,129.6 390,128 325,126.4 260,124.8 195,121.6 130,120 65,120 0,120" fill="#14202B" stroke="#F6F6F1" stroke-width="1"/>
+<polygon points="0,40 65,40 130,40 195,24 260,19.2 325,16 390,14.4 455,14.4 520,12.8 520,48 455,49.6 390,51.2 325,54.4 260,60.8 195,68.8 130,80 65,80 0,80" fill="#5F7C94" stroke="#F6F6F1" stroke-width="1"/>
+<polygon points="0,0 520,0 520,12.8 455,14.4 390,14.4 325,16 260,19.2 195,24 130,40 65,40 0,40" fill="#C9D8E3" stroke="#F6F6F1" stroke-width="1"/>
+<line x1="195" y1="-8" x2="195" y2="160" stroke="#14202B" stroke-width="1" stroke-dasharray="3 3"/>
+</g>
+<text x="237" y="14" font-size="12" fill="#14202B" font-family="Hanken Grotesk, sans-serif">Day 4: traffic starts to shift</text>
+<text x="30" y="28" font-size="11" text-anchor="end" fill="#4A5A68" font-family="JetBrains Mono, monospace">100%</text>
+<text x="30" y="108" font-size="11" text-anchor="end" fill="#4A5A68" font-family="JetBrains Mono, monospace">50%</text>
+<text x="30" y="188" font-size="11" text-anchor="end" fill="#4A5A68" font-family="JetBrains Mono, monospace">0%</text>
+<text x="36" y="204" font-size="11" text-anchor="middle" fill="#4A5A68" font-family="JetBrains Mono, monospace">Day 1</text>
+<text x="296" y="204" font-size="11" text-anchor="middle" fill="#4A5A68" font-family="JetBrains Mono, monospace">Day 5</text>
+<text x="556" y="204" font-size="11" text-anchor="middle" fill="#4A5A68" font-family="JetBrains Mono, monospace">Day 9</text>
+<text x="566" y="173" font-size="12" fill="#14202B" font-family="Hanken Grotesk, sans-serif">Original</text>
+<text x="566" y="118" font-size="12" font-weight="600" fill="#14202B" font-family="Hanken Grotesk, sans-serif">Variant 1</text>
+<text x="566" y="60" font-size="12" fill="#14202B" font-family="Hanken Grotesk, sans-serif">Variant 2</text>
+<text x="566" y="34" font-size="12" fill="#14202B" font-family="Hanken Grotesk, sans-serif">Variant 3</text>
+</svg>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 1px solid #C9D1D4; padding-bottom: 8px">
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 20px; font-weight: 500">Also testing</h2>
+<div style="font-size: 14px; color: #4A5A68">One test per place on the page</div>
+</div>
+<sc-for list="{{others}}" as="o" hint-placeholder-count="3">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 14px 0; border-bottom: 1px solid #E1E5E4">
+<div style="flex: 1 1 180px; font-weight: 600">{{o.place}}</div>
+<div style="flex: none; font-size: 13px; font-weight: 600; border: 1px solid #14202B; padding: 1px 10px; border-radius: 2px">{{o.stage}}</div>
+<div style="flex: 2 1 260px; font-size: 14px; color: #4A5A68">{{o.detail}}</div>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; border-bottom: 1px solid #C9D1D4; padding-bottom: 8px">
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 20px; font-weight: 500">Improvements kept</h2>
+<div style="font-size: 14px; color: #4A5A68">Each one was confirmed by a fixed 50/50 test</div>
+</div>
+<div style="overflow-x: auto">
+<div style="min-width: 640px; display: flex; flex-direction: column">
+<div style="display: grid; grid-template-columns: 70px minmax(120px, 1fr) minmax(260px, 2.2fr) 130px; gap: 16px; padding: 6px 0 10px; font-size: 13px; color: #4A5A68; font-weight: 600">
+<div>Date</div><div>Place</div><div>Change</div><div style="text-align: right">Purchases</div>
+</div>
+<sc-for list="{{wins}}" as="w" hint-placeholder-count="3">
+<div style="display: grid; grid-template-columns: 70px minmax(120px, 1fr) minmax(260px, 2.2fr) 130px; gap: 16px; align-items: baseline; padding: 14px 0; border-top: 1px solid #E1E5E4">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px">{{w.date}}</div>
+<div style="font-weight: 600">{{w.place}}</div>
+<div style="font-family: 'Newsreader', Georgia, serif; font-size: 16px; line-height: 1.35"><span style="color: #4A5A68; text-decoration: line-through">{{w.before}}</span><span style="color: #4A5A68"> to </span><span style="font-style: italic">{{w.after}}</span></div>
+<div style="text-align: right"><div style="font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 500; line-height: 1.1">{{w.lift}}</div><div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #4A5A68">{{w.range}}</div></div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+
+</div>
+
+<!-- Right -->
+<div style="flex: 1 1 300px; max-width: 360px; min-width: 0; display: flex; flex-direction: column; gap: 40px">
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 20px; font-weight: 500; border-bottom: 1px solid #C9D1D4; padding-bottom: 8px">Guardrails</h2>
+<sc-for list="{{guards}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid #E1E5E4">
+<div><div style="font-weight: 600">{{g.name}}</div><div style="font-size: 13px; color: #4A5A68">{{g.limit}}</div></div>
+<div style="text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px">{{g.now}}</div>
+</div>
+</sc-for>
+<div style="display: flex; align-items: center; gap: 8px; padding-top: 10px; font-size: 14px; font-weight: 600">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#14202B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg>All clear
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 20px; font-weight: 500; border-bottom: 1px solid #C9D1D4; padding-bottom: 8px">Stopped by safety</h2>
+<sc-for list="{{stopped}}" as="s" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 12px 0; border-bottom: 1px solid #E1E5E4">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 13px"><span style="font-weight: 600">{{s.kind}}</span><span style="font-family: 'JetBrains Mono', monospace; color: #4A5A68">{{s.date}}</span></div>
+<div style="font-family: 'Newsreader', Georgia, serif; font-style: italic; font-size: 16px; line-height: 1.3">{{s.what}}</div>
+<div style="font-size: 14px; color: #4A5A68">{{s.why}}</div>
+</div>
+</sc-for>
+<div style="padding-top: 10px; font-size: 14px"><a href="#" style="font-weight: 600">See the full audit log</a></div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 20px; font-weight: 500; border-bottom: 1px solid #C9D1D4; padding-bottom: 8px">What it has learned</h2>
+<sc-for list="{{notes}}" as="n" hint-placeholder-count="3">
+<div style="padding: 12px 0; border-bottom: 1px solid #E1E5E4; font-family: 'Newsreader', Georgia, serif; font-size: 17px; line-height: 1.35">{{n.text}}</div>
+</sc-for>
+<div style="padding-top: 6px; font-size: 13px; color: #4A5A68">The agent reads these notes before it writes the next round.</div>
+</div>
+
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1920}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+variants: [
+{ name: 'Original', text: 'Build your first AI project this month', swatch: '#A9B2B9', share: '18', visitors: '1,126', rate: '3.4%', best: '11%' },
+{ name: 'Variant 1', text: 'Start building with AI today', swatch: '#14202B', share: '52', visitors: '1,458', rate: '3.9%', best: '71%' },
+{ name: 'Variant 2', text: 'A practical way into AI, one project at a time', swatch: '#5F7C94', share: '22', visitors: '1,044', rate: '3.5%', best: '14%' },
+{ name: 'Variant 3', text: 'Learn AI without the jargon', swatch: '#C9D8E3', share: '8', visitors: '582', rate: '3.1%', best: '4%' }
+],
+others: [
+{ place: 'Hero button', stage: 'Confirming', detail: 'Fixed 50/50 test, day 4 of 7. "See the course" against "Start a free lesson".' },
+{ place: 'Course card order', stage: 'Warm-up', detail: 'Equal split while enough visitors arrive, day 3 of 7.' },
+{ place: 'Footer prompt', stage: 'Canary', detail: '1% of visitors, checking only for errors and slow pages.' }
+],
+wins: [
+{ date: 'Oct 6', place: 'Hero headline', before: 'Learn AI in four weeks', after: 'Build your first AI project this month', lift: '+9.1%', range: '3.2% to 15.4%' },
+{ date: 'Sep 28', place: 'Hero button', before: 'Sign up', after: 'See the course', lift: '+5.4%', range: '1.1% to 9.9%' },
+{ date: 'Sep 19', place: 'Course card order', before: 'Advanced first', after: 'Starter first', lift: '+3.8%', range: '0.4% to 7.4%' }
+],
+guards: [
+{ name: 'Page errors', limit: 'Stops a variant above 2x the original', now: '0.9x' },
+{ name: 'Page speed', limit: 'Stops a variant over +200 ms', now: '+40 ms' },
+{ name: 'Data health', limit: 'Freezes weights if counts drift', now: 'Normal' },
+{ name: 'Traffic floor', limit: 'Every live variant keeps at least 1%', now: '8% lowest' }
+],
+stopped: [
+{ kind: 'Blocked', date: 'Oct 8', what: 'Save 30% this week', why: 'The discount is not in your facts.' },
+{ kind: 'Blocked', date: 'Oct 7', what: 'Join thousands of learners', why: 'A new claim, not in your facts.' },
+{ kind: 'Blocked', date: 'Oct 5', what: 'White text on a yellow button', why: 'Contrast is below the accessibility minimum.' },
+{ kind: 'Rolled back', date: 'Oct 3', what: 'Hero headline, variant 4', why: 'Page errors at 2.4x the original.' }
+],
+notes: [
+{ text: 'Shorter headlines win on phones.' },
+{ text: 'A button that names the thing beats a generic one.' },
+{ text: 'Headlines that promise a project beat ones that promise a skill.' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

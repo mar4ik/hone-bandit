@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mission control: What the agent did</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3DD68C}a:hover{color:#E8ECF1}
+</style>
+</helmet>
+<div style="background: #0D1117; color: #E8ECF1; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; line-height: 1.5; min-height: 1500px; box-sizing: border-box">
+
+<div style="border-bottom: 1px solid #2B3441">
+<div style="max-width: 1280px; margin: 0 auto; padding: 14px 40px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 32px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px">
+<div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em">Bandit Agent</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #A3AEBC">Sites / example-courses.com</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; font-size: 14px; font-weight: 500">
+<a href="#" style="text-decoration: none; color: #A3AEBC">Sites</a>
+<a href="#" style="text-decoration: none; color: #E8ECF1; border-bottom: 2px solid #3DD68C; padding-bottom: 2px">Activity</a>
+<a href="#" style="text-decoration: none; color: #A3AEBC">Rules</a>
+<span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC; border: 1px solid #2B3441; padding: 1px 8px; border-radius: 4px">Sample data</span>
+</div>
+</div>
+</div>
+
+<div style="max-width: 1280px; margin: 0 auto; padding: 40px 40px 72px; box-sizing: border-box; display: flex; flex-direction: column; gap: 32px">
+
+<!-- Header -->
+<div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 40px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-family: 'Geist Mono', monospace; font-size: 13px; color: #3DD68C">DAY 25</div>
+<h1 style="margin: 0; font-size: 40px; line-height: 1.1; font-weight: 600; letter-spacing: -0.03em">Example Courses</h1>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+<button type="button" style="height: 48px; padding: 0 22px; border: 2px solid #FF7A6B; border-radius: 8px; background: transparent; color: #FF7A6B; font-family: 'Geist', system-ui, sans-serif; font-size: 15px; font-weight: 600; cursor: pointer">Show the original to everyone</button>
+<div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">KILL SWITCH. LIVE WITHIN ~1 MIN.</div>
+</div>
+</div>
+
+<!-- Status strip -->
+<div style="display: flex; flex-wrap: wrap; background: #151B23; border: 1px solid #2B3441; border-radius: 8px">
+<div style="flex: 1 1 220px; padding: 16px 20px; display: flex; align-items: center; gap: 12px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3DD68C; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">AGENT</span><span style="font-weight: 600">Learning</span></span></div>
+<div style="flex: 1 1 220px; padding: 16px 20px; border-left: 1px solid #2B3441; display: flex; align-items: center; gap: 12px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3DD68C; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">GUARDRAILS</span><span style="font-weight: 600">All clear</span></span></div>
+<div style="flex: 1 1 220px; padding: 16px 20px; border-left: 1px solid #2B3441; display: flex; align-items: center; gap: 12px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3DD68C; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">DATA</span><span style="font-weight: 600">Normal</span></span></div>
+<div style="flex: 1 1 220px; padding: 16px 20px; border-left: 1px solid #2B3441; display: flex; align-items: center; gap: 12px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3DD68C; flex: none; display: inline-block"></span><span style="display: flex; flex-direction: column"><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">TRAFFIC FLOOR</span><span style="font-weight: 600">1% held, lowest is 8%</span></span></div>
+</div>
+
+<!-- Figures -->
+<div style="display: flex; flex-wrap: wrap; gap: 24px 56px">
+<div style="display: flex; flex-direction: column; gap: 2px"><div style="font-size: 64px; line-height: 1; font-weight: 600; letter-spacing: -0.04em; color: #3DD68C">+19%</div><div style="font-size: 15px">Purchases per visitor</div><div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">2.9% TO 3.5% SINCE START</div></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><div style="font-size: 64px; line-height: 1; font-weight: 600; letter-spacing: -0.04em">4</div><div style="font-size: 15px">Tests live</div><div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">ONE IN EACH OF 4 STAGES</div></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><div style="font-size: 64px; line-height: 1; font-weight: 600; letter-spacing: -0.04em">3</div><div style="font-size: 15px">Changes kept</div><div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">EACH CONFIRMED BY A FIXED TEST</div></div>
+<div style="display: flex; flex-direction: column; gap: 2px"><div style="font-size: 64px; line-height: 1; font-weight: 600; letter-spacing: -0.04em">4</div><div style="font-size: 15px">Stopped by safety</div><div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">3 NEVER REACHED A VISITOR</div></div>
+</div>
+
+<!-- Lanes -->
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Every variant, by stage</h2>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch">
+
+<div style="flex: 1 1 210px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="padding-bottom: 8px; border-bottom: 2px solid #2B3441"><div style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500">01 CANARY</div><div style="font-size: 13px; color: #A3AEBC">1% of traffic, errors only</div></div>
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-weight: 600">Footer prompt</div>
+<div style="font-size: 14px; color: #A3AEBC">2 variants on 1% of visitors</div>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 13px"><span style="width: 8px; height: 8px; border-radius: 50%; background: #3DD68C; display: inline-block"></span>No errors so far</div>
+</div>
+</div>
+
+<div style="flex: 1 1 210px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="padding-bottom: 8px; border-bottom: 2px solid #2B3441"><div style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500">02 WARM-UP</div><div style="font-size: 13px; color: #A3AEBC">Equal split, weights fixed</div></div>
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-weight: 600">Course card order</div>
+<div style="font-size: 14px; color: #A3AEBC">Starter first against Popular first</div>
+<div style="height: 6px; background: #2B3441; border-radius: 99px"><div style="height: 6px; width: 43%; background: #E8ECF1; border-radius: 99px"></div></div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">DAY 3 OF 7</div>
+</div>
+</div>
+
+<div style="flex: 2 1 330px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="padding-bottom: 8px; border-bottom: 2px solid #3DD68C"><div style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500; color: #3DD68C">03 BANDIT</div><div style="font-size: 13px; color: #A3AEBC">Traffic shifts toward what works</div></div>
+<div style="background: #151B23; border: 1px solid #3DD68C; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1 1 auto">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px"><span style="font-weight: 600">Hero headline</span><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">ROUND 5, DAY 9</span></div>
+<sc-for list="{{variants}}" as="v" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 14px"><span style="font-weight: 500">{{v.name}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 13px">{{v.share}}% of traffic</span></div>
+<div style="height: 8px; background: #2B3441; border-radius: 99px"><div style="height: 8px; border-radius: 99px; background: {{v.fill}}; width: {{v.share}}%"></div></div>
+</div>
+</sc-for>
+<div style="padding-top: 8px; border-top: 1px solid #2B3441; font-size: 14px">Variant 1 has a <span style="font-weight: 600; color: #3DD68C">71% chance</span> of being best. Needs 95% to move on.</div>
+</div>
+</div>
+
+<div style="flex: 1 1 210px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="padding-bottom: 8px; border-bottom: 2px solid #2B3441"><div style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500">04 CONFIRM</div><div style="font-size: 13px; color: #A3AEBC">Fixed 50/50 against the original</div></div>
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<div style="font-weight: 600">Hero button</div>
+<div style="font-size: 14px; color: #A3AEBC">See the course against Start a free lesson</div>
+<div style="height: 6px; background: #2B3441; border-radius: 99px"><div style="height: 6px; width: 57%; background: #E8ECF1; border-radius: 99px"></div></div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">DAY 4 OF 7</div>
+</div>
+</div>
+
+<div style="flex: 1 1 210px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+<div style="padding-bottom: 8px; border-bottom: 2px solid #2B3441"><div style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 500">05 PROMOTED</div><div style="font-size: 13px; color: #A3AEBC">Now the original for everyone</div></div>
+<sc-for list="{{wins}}" as="w" hint-placeholder-count="3">
+<div style="background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px"><span style="font-weight: 600">{{w.place}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 14px; color: #3DD68C; font-weight: 500">{{w.lift}}</span></div>
+<div style="font-size: 14px; color: #A3AEBC">{{w.after}}</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">{{w.date}} / {{w.range}}</div>
+</div>
+</sc-for>
+</div>
+
+</div>
+</div>
+
+<!-- Chart + log -->
+<div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch">
+
+<div style="flex: 1 1 520px; min-width: 0; background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px"><h2 style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Hero headline: share of traffic by day</h2><span style="font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC">100% = ALL VISITORS</span></div>
+<svg viewBox="0 0 640 210" style="width: 100%; max-width: 700px; height: auto; display: block" role="img" aria-label="Stacked areas of traffic share per variant over nine days. Variant 1 grows from 25 to 52 percent after day 4.">
+<g transform="translate(36 24)">
+<polygon points="0,160 0,120 65,120 130,120 195,121.6 260,124.8 325,126.4 390,128 455,129.6 520,131.2 520,160" fill="#5B6675" stroke="#151B23" stroke-width="1.5"/>
+<polygon points="0,80 65,80 130,80 195,68.8 260,60.8 325,54.4 390,51.2 455,49.6 520,48 520,131.2 455,129.6 390,128 325,126.4 260,124.8 195,121.6 130,120 65,120 0,120" fill="#3DD68C" stroke="#151B23" stroke-width="1.5"/>
+<polygon points="0,40 65,40 130,40 195,24 260,19.2 325,16 390,14.4 455,14.4 520,12.8 520,48 455,49.6 390,51.2 325,54.4 260,60.8 195,68.8 130,80 65,80 0,80" fill="#7BE0B0" stroke="#151B23" stroke-width="1.5"/>
+<polygon points="0,0 520,0 520,12.8 455,14.4 390,14.4 325,16 260,19.2 195,24 130,40 65,40 0,40" fill="#B8F0D4" stroke="#151B23" stroke-width="1.5"/>
+<line x1="195" y1="-8" x2="195" y2="160" stroke="#E8ECF1" stroke-width="1" stroke-dasharray="3 3"/>
+</g>
+<text x="237" y="14" font-size="12" fill="#E8ECF1" font-family="Geist, sans-serif">Day 4: traffic starts to shift</text>
+<text x="30" y="28" font-size="11" text-anchor="end" fill="#A3AEBC" font-family="Geist Mono, monospace">100%</text>
+<text x="30" y="108" font-size="11" text-anchor="end" fill="#A3AEBC" font-family="Geist Mono, monospace">50%</text>
+<text x="30" y="188" font-size="11" text-anchor="end" fill="#A3AEBC" font-family="Geist Mono, monospace">0%</text>
+<text x="36" y="204" font-size="11" text-anchor="middle" fill="#A3AEBC" font-family="Geist Mono, monospace">Day 1</text>
+<text x="296" y="204" font-size="11" text-anchor="middle" fill="#A3AEBC" font-family="Geist Mono, monospace">Day 5</text>
+<text x="556" y="204" font-size="11" text-anchor="middle" fill="#A3AEBC" font-family="Geist Mono, monospace">Day 9</text>
+<text x="566" y="173" font-size="12" fill="#E8ECF1" font-family="Geist, sans-serif">Original</text>
+<text x="566" y="118" font-size="12" font-weight="600" fill="#3DD68C" font-family="Geist, sans-serif">Variant 1</text>
+<text x="566" y="60" font-size="12" fill="#E8ECF1" font-family="Geist, sans-serif">Variant 2</text>
+<text x="566" y="34" font-size="12" fill="#E8ECF1" font-family="Geist, sans-serif">Variant 3</text>
+</svg>
+<div style="font-size: 14px; color: #A3AEBC">Days 1 to 3 are a fixed equal split. After that the agent gives more traffic to the variants that convert, and never less than 1% to any.</div>
+</div>
+
+<div style="flex: 1 1 400px; min-width: 0; background: #151B23; border: 1px solid #2B3441; border-radius: 8px; padding: 24px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; padding-bottom: 10px"><h2 style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em">Audit log</h2><a href="#" style="font-size: 14px; font-weight: 500">Export</a></div>
+<sc-for list="{{log}}" as="l" hint-placeholder-count="8">
+<div style="display: flex; flex-wrap: wrap; gap: 2px 12px; padding: 10px 0; border-top: 1px solid #2B3441; font-size: 14px">
+<span style="width: 92px; flex: none; font-family: 'Geist Mono', monospace; font-size: 12px; color: #A3AEBC; padding-top: 2px">{{l.time}}</span>
+<span style="width: 58px; flex: none; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 500; padding-top: 2px; color: {{l.color}}">{{l.who}}</span>
+<span style="flex: 1 1 180px; min-width: 0">{{l.what}}</span>
+</div>
+</sc-for>
+</div>
+
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+return {
+variants: [
+{ name: 'Original', share: '18', fill: '#5B6675' },
+{ name: 'Variant 1: Start building with AI today', share: '52', fill: '#3DD68C' },
+{ name: 'Variant 2: A practical way into AI', share: '22', fill: '#7BE0B0' },
+{ name: 'Variant 3: Learn AI without the jargon', share: '8', fill: '#B8F0D4' }
+],
+wins: [
+{ place: 'Hero headline', lift: '+9.1%', after: 'Build your first AI project this month', date: 'OCT 6', range: '3.2 TO 15.4' },
+{ place: 'Hero button', lift: '+5.4%', after: 'See the course', date: 'SEP 28', range: '1.1 TO 9.9' },
+{ place: 'Course card order', lift: '+3.8%', after: 'Starter first', date: 'SEP 19', range: '0.4 TO 7.4' }
+],
+log: [
+{ time: 'Oct 9 09:40', who: 'AGENT', color: '#3DD68C', what: 'Weights updated: Variant 1 52%, Variant 2 22%, original 18%, Variant 3 8%.' },
+{ time: 'Oct 8 14:02', who: 'SAFETY', color: '#F5A524', what: 'Blocked "Save 30% this week". The discount is not in your facts.' },
+{ time: 'Oct 7 09:15', who: 'SAFETY', color: '#F5A524', what: 'Blocked "Join thousands of learners". A new claim, not in your facts.' },
+{ time: 'Oct 6 11:15', who: 'AGENT', color: '#3DD68C', what: 'Promoted "Build your first AI project this month": +9.1%, range 3.2 to 15.4.' },
+{ time: 'Oct 5 21:40', who: 'SAFETY', color: '#F5A524', what: 'Blocked a white-on-yellow button. Contrast is below the accessibility minimum.' },
+{ time: 'Oct 3 03:12', who: 'SAFETY', color: '#F5A524', what: 'Rolled back Variant 4 of the hero headline. Page errors at 2.4x the original.' },
+{ time: 'Sep 28 16:30', who: 'AGENT', color: '#3DD68C', what: 'Promoted "See the course" on the hero button: +5.4%.' },
+{ time: 'Sep 14 10:02', who: 'YOU', color: '#E8ECF1', what: 'Started learning on example-courses.com. Human review off.' }
+]
+};
+}
+}
+</script>
+</body>
+</html>

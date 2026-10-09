@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ledger: Connect a site</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#14202B}
+</style>
+</helmet>
+<div style="background: #F6F6F1; color: #14202B; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; line-height: 1.5; min-height: 2060px; box-sizing: border-box">
+
+<div style="border-bottom: 1px solid #14202B">
+<div style="max-width: 1200px; margin: 0 auto; padding: 18px 40px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px">
+<div style="font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 600; letter-spacing: -0.01em">Bandit Agent</div>
+<nav style="display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 15px; font-weight: 500">
+<a href="#" style="text-decoration: none; border-bottom: 2px solid #14202B; padding-bottom: 2px">Sites</a>
+<a href="#" style="text-decoration: none">Activity</a>
+<a href="#" style="text-decoration: none">Rules</a>
+<a href="#" style="text-decoration: none">Settings</a>
+</nav>
+</div>
+</div>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 56px 40px 72px; box-sizing: border-box">
+
+<div style="display: flex; flex-direction: column; gap: 12px; max-width: 720px; padding-bottom: 40px">
+<h1 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 48px; line-height: 1.08; font-weight: 500; letter-spacing: -0.02em">Connect a site</h1>
+<p style="margin: 0; font-size: 18px; line-height: 1.5; color: #4A5A68">Paste your address, add one line of code, and say what counts as success. The agent does the rest, inside rules you set once.</p>
+</div>
+
+<!-- 1 Site -->
+<div style="display: flex; flex-wrap: wrap; gap: 16px 56px; padding: 32px 0; border-top: 1px solid #C9D1D4">
+<div style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">1</div>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: -0.01em">Site</h2>
+<div style="font-size: 14px; color: #4A5A68">Where the agent will work.</div>
+</div>
+<div style="flex: 999 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end">
+<div style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 6px">
+<label for="site-url" style="font-size: 14px; font-weight: 600">Site address</label>
+<input id="site-url" type="text" value="https://www.example-courses.com" readonly style="height: 44px; box-sizing: border-box; border: 1px solid #14202B; border-radius: 2px; background: #FFFFFF; padding: 0 12px; font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #14202B; width: 100%">
+</div>
+<button type="button" style="height: 44px; padding: 0 22px; border: 0; border-radius: 2px; background: #14202B; color: #F6F6F1; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 600; cursor: pointer">Check site</button>
+</div>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 14px">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#14202B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 4.5"/></svg>
+<span>Reached the site. 14 pages found, built with a static site generator.</span>
+</div>
+</div>
+</div>
+
+<!-- 2 Install -->
+<div style="display: flex; flex-wrap: wrap; gap: 16px 56px; padding: 32px 0; border-top: 1px solid #C9D1D4">
+<div style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">2</div>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: -0.01em">Install</h2>
+<div style="font-size: 14px; color: #4A5A68">One line. Pick how your site is built.</div>
+</div>
+<div style="flex: 999 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-wrap: wrap; gap: 0 24px; border-bottom: 1px solid #C9D1D4">
+<button type="button" style="height: 44px; padding: 0; border: 0; border-bottom: 3px solid #14202B; margin-bottom: -1px; background: transparent; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 600; color: #14202B; cursor: pointer">Script tag</button>
+<button type="button" style="height: 44px; padding: 0; border: 0; background: transparent; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 500; color: #4A5A68; cursor: pointer">Tag manager</button>
+<button type="button" style="height: 44px; padding: 0; border: 0; background: transparent; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 500; color: #4A5A68; cursor: pointer">Single-page app</button>
+<button type="button" style="height: 44px; padding: 0; border: 0; background: transparent; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 500; color: #4A5A68; cursor: pointer">Edge worker</button>
+<button type="button" style="height: 44px; padding: 0; border: 0; background: transparent; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 500; color: #4A5A68; cursor: pointer">Server SDK</button>
+</div>
+<div style="font-size: 15px; color: #14202B">Works on any HTML site. Paste it in the head of every page, before your other scripts.</div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch">
+<div style="flex: 1 1 360px; min-width: 0; background: #14202B; color: #F6F6F1; border-radius: 2px; padding: 16px 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; overflow-x: auto; white-space: pre">&lt;script src="https://[AGENT HOST]/agent.js"
+        data-site="[SITE KEY]" async&gt;&lt;/script&gt;</div>
+<button type="button" style="height: 44px; align-self: flex-start; padding: 0 20px; border: 1px solid #14202B; border-radius: 2px; background: transparent; color: #14202B; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 600; cursor: pointer">Copy</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px">
+<span style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 50%; border: 2px solid #14202B; box-sizing: border-box; display: inline-block"></span>Waiting for the first page view</span>
+<a href="#" style="font-weight: 600">Check again</a>
+</div>
+</div>
+</div>
+
+<!-- 3 Goal -->
+<div style="display: flex; flex-wrap: wrap; gap: 16px 56px; padding: 32px 0; border-top: 1px solid #C9D1D4">
+<div style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">3</div>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: -0.01em">Goal</h2>
+<div style="font-size: 14px; color: #4A5A68">What counts as success. The agent optimises for this one event.</div>
+</div>
+<div style="flex: 999 1 440px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+<fieldset style="border: 0; margin: 0; padding: 0; display: flex; flex-direction: column">
+<legend style="padding: 0; margin-bottom: 8px; font-size: 14px; font-weight: 600">Events found on your site</legend>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; border-top: 1px solid #E1E5E4; cursor: pointer">
+<input type="radio" name="goal" checked readonly style="width: 18px; height: 18px; margin: 0; accent-color: #14202B">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500">purchase_completed</span>
+<span style="font-size: 14px; color: #4A5A68">A course purchase is finished</span>
+</label>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; border-top: 1px solid #E1E5E4; cursor: pointer">
+<input type="radio" name="goal" readonly style="width: 18px; height: 18px; margin: 0; accent-color: #14202B">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500">purchase_started</span>
+<span style="font-size: 14px; color: #4A5A68">Checkout opened</span>
+</label>
+<label style="display: flex; align-items: center; gap: 12px; min-height: 44px; border-top: 1px solid #E1E5E4; border-bottom: 1px solid #E1E5E4; cursor: pointer">
+<input type="radio" name="goal" readonly style="width: 18px; height: 18px; margin: 0; accent-color: #14202B">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 500">product_variant_clicked</span>
+<span style="font-size: 14px; color: #4A5A68">A course card clicked</span>
+</label>
+</fieldset>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 15px">
+<span>Count a visit as a success if it happens within</span>
+<select aria-label="Days" style="height: 44px; border: 1px solid #14202B; border-radius: 2px; background: #FFFFFF; padding: 0 12px; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; color: #14202B"><option>7 days</option><option>1 day</option><option>14 days</option><option>30 days</option></select>
+</div>
+<div style="font-size: 14px; color: #4A5A68; max-width: 560px">Purchases arrive days after the visit, so the agent will run fixed A/B tests first and only shift traffic once enough results are in.</div>
+</div>
+</div>
+
+<!-- 4 Places -->
+<div style="display: flex; flex-wrap: wrap; gap: 16px 56px; padding: 32px 0; border-top: 1px solid #C9D1D4">
+<div style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">4</div>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: -0.01em">Places to change</h2>
+<div style="font-size: 14px; color: #4A5A68">Found by reading your home page. The agent may touch only what you tick.</div>
+</div>
+<div style="flex: 999 1 440px; min-width: 0; display: flex; flex-direction: column">
+<label style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; border-top: 1px solid #E1E5E4; cursor: pointer">
+<input type="checkbox" checked readonly style="width: 18px; height: 18px; margin: 0; accent-color: #14202B">
+<span style="font-weight: 600; min-width: 140px">Hero headline</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">h1.hero-title</span>
+<span style="flex: 1 1 260px; font-family: 'Newsreader', Georgia, serif; font-size: 17px; font-style: italic">Build your first AI project this month</span>
+</label>
+<label style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; border-top: 1px solid #E1E5E4; cursor: pointer">
+<input type="checkbox" checked readonly style="width: 18px; height: 18px; margin: 0; accent-color: #14202B">
+<span style="font-weight: 600; min-width: 140px">Hero button</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">a.hero-cta</span>
+<span style="flex: 1 1 260px; font-family: 'Newsreader', Georgia, serif; font-size: 17px; font-style: italic">See the course</span>
+</label>
+<label style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 14px 0; border-top: 1px solid #E1E5E4; border-bottom: 1px solid #E1E5E4; cursor: pointer">
+<input type="checkbox" readonly style="width: 18px; height: 18px; margin: 0; accent-color: #14202B">
+<span style="font-weight: 600; min-width: 140px">Course card order</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">section#courses</span>
+<span style="flex: 1 1 260px; font-family: 'Newsreader', Georgia, serif; font-size: 17px; font-style: italic">Starter, Popular, Advanced</span>
+</label>
+<div style="padding-top: 14px; font-size: 14px"><a href="#" style="font-weight: 600">Add a place by selector</a></div>
+</div>
+</div>
+
+<!-- 5 Rules -->
+<div style="display: flex; flex-wrap: wrap; gap: 16px 56px; padding: 32px 0; border-top: 1px solid #C9D1D4">
+<div style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">5</div>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: -0.01em">Rules</h2>
+<div style="font-size: 14px; color: #4A5A68">Set once by you. The agent can read these rules but never edit them.</div>
+</div>
+<div style="flex: 999 1 440px; min-width: 0; display: flex; flex-direction: column">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 14px 0; border-top: 1px solid #E1E5E4">
+<div style="flex: 1 1 260px"><div style="font-weight: 600">Facts it may mention</div><div style="font-size: 14px; color: #4A5A68">Prices, dates and numbers. Until you add some, no variant can mention a number.</div></div>
+<div style="font-size: 14px; font-weight: 600">None added</div>
+<a href="#" style="font-size: 14px; font-weight: 600">Add facts</a>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 14px 0; border-top: 1px solid #E1E5E4">
+<div style="flex: 1 1 260px"><div style="font-weight: 600">Brand</div><div style="font-size: 14px; color: #4A5A68">Colours, fonts and sizes variants must stay inside.</div></div>
+<div style="font-size: 14px; font-weight: 600">6 colours, 2 fonts found</div>
+<a href="#" style="font-size: 14px; font-weight: 600">Review</a>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 14px 0; border-top: 1px solid #E1E5E4">
+<div style="flex: 1 1 260px"><div style="font-weight: 600">Never changes</div><div style="font-size: 14px; color: #4A5A68">Prices, discounts, legal and consent text, forms, links to other sites.</div></div>
+<div style="font-size: 14px; font-weight: 600">Locked</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 14px 0; border-top: 1px solid #E1E5E4; border-bottom: 1px solid #E1E5E4">
+<div style="flex: 1 1 260px"><div style="font-weight: 600">Visitor consent</div><div style="font-size: 14px; color: #4A5A68">Without consent, a visitor sees the original page and is not counted.</div></div>
+<div style="font-size: 14px; font-weight: 600">On, cookie banner detected</div>
+<a href="#" style="font-size: 14px; font-weight: 600">Change</a>
+</div>
+</div>
+</div>
+
+<!-- 6 Review -->
+<div style="display: flex; flex-wrap: wrap; gap: 16px 56px; padding: 32px 0; border-top: 1px solid #C9D1D4">
+<div style="flex: 1 1 200px; max-width: 240px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #4A5A68">6</div>
+<h2 style="margin: 0; font-family: 'Newsreader', Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: -0.01em">Review</h2>
+<div style="font-size: 14px; color: #4A5A68">Who looks at new wording before visitors do.</div>
+</div>
+<div style="flex: 999 1 440px; min-width: 0; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 20px">
+<button type="button" role="switch" aria-checked="false" aria-label="Human review of variants" style="flex: none; position: relative; width: 56px; height: 32px; padding: 0; border: 2px solid #14202B; border-radius: 16px; background: transparent; cursor: pointer"><span style="position: absolute; top: 4px; left: 4px; width: 20px; height: 20px; border-radius: 50%; background: #14202B; display: block"></span></button>
+<div style="flex: 1 1 320px; max-width: 560px; display: flex; flex-direction: column; gap: 4px">
+<div style="font-size: 17px; font-weight: 600; line-height: 32px">Human review is off</div>
+<div style="font-size: 15px; color: #4A5A68">New wording goes live without waiting for you. It still has to pass the safety checks, and it starts on 1% of visitors. Switch this on to approve each variant yourself. You can change it any time for this site.</div>
+</div>
+</div>
+</div>
+
+<!-- Start -->
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; padding: 28px 0 0; border-top: 1px solid #14202B">
+<div style="flex: 1 1 360px; max-width: 560px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-weight: 600">Human review is off. New wording goes live without waiting for you.</div>
+<div style="font-size: 15px; color: #4A5A68">It starts in warm-up with an equal split, on 1% of visitors for new variants. Nothing goes live until it passes the safety layer.</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<button type="button" style="height: 48px; padding: 0 22px; border: 1px solid #14202B; border-radius: 2px; background: transparent; color: #14202B; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 600; cursor: pointer">Save and finish later</button>
+<button type="button" style="height: 48px; padding: 0 28px; border: 0; border-radius: 2px; background: #C8381A; color: #FFFFFF; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 16px; font-weight: 600; cursor: pointer">Start learning</button>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":2060}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
