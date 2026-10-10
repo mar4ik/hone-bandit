@@ -16,6 +16,10 @@
  * Attributes: data-experiment (required), data-api (default: the host this file came from),
  *             data-hide (selectors to hide until the answer arrives, at most data-timeout ms; default 700),
  *             data-remember (hours to keep the last answer in this site's own storage; default 6; 0 = never).
+ *
+ * For a site whose server can ask Hone before it sends the page (edge/hone-edge.mjs), the answer arrives in a cookie and
+ * this file can load with async: nothing is hidden and nothing waits. When the server's answer comes, the page gets a
+ * "hone:answer" event (detail: variant, changes, track, assigned).
  */
 (function () {
   'use strict';
@@ -243,10 +247,25 @@
     return !g || (typeof g === 'object' && ((g.type === 'click' && typeof g.selector === 'string') || (g.type === 'pageview' && typeof g.path === 'string')));
   }
 
+  /** The saved answer: from this site's storage, or from the cookie a server-side helper (edge/hone-edge.mjs) set before the page was sent. The newer one wins. */
+  function saved() {
+    var best = null;
+    function take(raw) {
+      try {
+        var x = JSON.parse(raw);
+        if (x && typeof x.t === 'number' && (!best || x.t > best.t)) best = x;
+      } catch (e) {}
+    }
+    try { take(localStorage.getItem(STORE)); } catch (e) {}
+    var m = document.cookie.match(new RegExp('(?:^|; )' + STORE + '=([^;]*)'));
+    if (m) { try { take(decodeURIComponent(m[1])); } catch (e) {} }
+    return best;
+  }
+
   function recall() {
     if (!rememberMs) return null;
     try {
-      var x = JSON.parse(localStorage.getItem(STORE));
+      var x = saved();
       if (!x || x.v !== 1 || x.i !== id || x.p !== cleanPath(path) || typeof x.t !== 'number') return null;
       var age = Date.now() - x.t;
       if (age < 0 || age > rememberMs) return null;
@@ -266,6 +285,7 @@
         localStorage.setItem(STORE, JSON.stringify({ v: 1, t: Date.now(), i: id, p: cleanPath(path), a: { variant: d.variant, track: true, changes: Array.isArray(d.changes) ? d.changes : [], goal: d.goal || null } }));
       } else {
         localStorage.removeItem(STORE);
+        if (document.cookie.indexOf(STORE + '=') >= 0) document.cookie = STORE + '=; max-age=0; path=/; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
       }
     } catch (e) {}
   }
@@ -288,6 +308,8 @@
       reveal();
       applyFailed = s.failed;
       window.__hone = { variant: d.variant, visitorId: id, assigned: d.assigned, track: d.track, applyFailed: applyFailed };
+      // The server's word is final: a page that keeps its own copy of the version (to paint it before this file arrives) can follow it.
+      try { document.dispatchEvent(new CustomEvent('hone:answer', { detail: { variant: d.variant, changes: Array.isArray(d.changes) ? d.changes : [], track: !!d.track, assigned: !!d.assigned } })); } catch (e) {}
       if (!d.track) {
         goal = null;
         return;
