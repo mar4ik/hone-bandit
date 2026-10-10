@@ -6,12 +6,16 @@
  * What it does on each page:
  *  1. Skips everything if the visitor sent Global Privacy Control or Do Not Track.
  *  2. Keeps a random visitor id in this site's own storage (no name, no email, nothing from other sites).
- *  3. Asks the Hone server which version of the page this visitor should see, and applies the changes.
- *     If the server is slow or down, the page simply shows as it is.
+ *  3. Shows the version this visitor should see. A visitor who was here before gets the answer they were given last
+ *     time straight away, without waiting for the network; the server is asked again every time, and if it says
+ *     something different the page switches to that. A visitor who is new waits for the server's answer (the parts
+ *     in data-hide stay hidden until then, at most data-timeout ms). If the server is slow or down, the page simply
+ *     shows as it is.
  *  4. Reports: that the page was seen, how healthy it was (errors, load speed), and whether the goal happened.
  *
  * Attributes: data-experiment (required), data-api (default: the host this file came from),
- *             data-hide (selectors to hide until the answer arrives, at most data-timeout ms; default 700).
+ *             data-hide (selectors to hide until the answer arrives, at most data-timeout ms; default 700),
+ *             data-remember (hours to keep the last answer in this site's own storage; default 6; 0 = never).
  */
 (function () {
   'use strict';
@@ -27,6 +31,8 @@
   var api = (script.getAttribute('data-api') || new URL(script.src, location.href).origin).replace(/\/+$/, '');
   var hideSelectors = script.getAttribute('data-hide') || '';
   var timeoutMs = Number(script.getAttribute('data-timeout')) || 700;
+  var rememberHours = script.getAttribute('data-remember');
+  var rememberMs = (rememberHours === null || rememberHours === '' || isNaN(Number(rememberHours)) ? 6 : Math.min(Math.max(Number(rememberHours), 0), 720)) * 3600000;
   var path = location.pathname;
 
   // Hide the parts that may change until the answer arrives, so the visitor never sees one text turn into another.
@@ -69,91 +75,249 @@
     if (readId() !== id) return reveal();
   }
 
-  // 3. Ask, then apply.
+  // 3. Show a version.
   var errored = false;
   var applyFailed = false;
+  var goal = null; // what to watch for; set from the remembered answer first, then from the server's
+  var goalFired = false;
+  var goalListening = false;
 
   function cleanPath(p) {
     p = p.split(/[?#]/)[0];
     return p.length > 1 ? p.replace(/\/+$/, '') : p || '/';
   }
 
+  // Each of these changes one thing on the page and gives back a function that puts it back as it was (or null if it could not be done).
   function setText(el, text) {
+    var before = Array.prototype.slice.call(el.childNodes);
     while (el.firstChild) el.removeChild(el.firstChild);
     var lines = String(text).split('\n');
     for (var i = 0; i < lines.length; i++) {
       if (i) el.appendChild(document.createElement('br'));
       el.appendChild(document.createTextNode(lines[i]));
     }
+    return function () {
+      while (el.firstChild) el.removeChild(el.firstChild);
+      before.forEach(function (n) { el.appendChild(n); });
+    };
   }
 
   var STYLE_PROPS = { color: 'color', background: 'backgroundColor', fontFamily: 'fontFamily', fontSizePx: 'fontSize' };
   function setStyle(el, style) {
+    var before = {};
     Object.keys(style).forEach(function (k) {
       var prop = STYLE_PROPS[k];
       if (!prop) return;
+      before[prop] = el.style[prop];
       var v = style[k];
       el.style[prop] = k === 'fontSizePx' ? v + 'px' : k === 'fontFamily' ? '"' + String(v).replace(/"/g, '') + '"' : v;
     });
+    return function () {
+      Object.keys(before).forEach(function (prop) { el.style[prop] = before[prop]; });
+    };
   }
 
   function setOrder(container, order) {
+    var kids = Array.prototype.slice.call(container.children);
     var items = {};
-    Array.prototype.forEach.call(container.children, function (c) {
+    kids.forEach(function (c) {
       var k = c.getAttribute('data-hone-key');
       if (k) items[k] = c;
     });
-    for (var i = 0; i < order.length; i++) if (!items[order[i]]) return false;
+    for (var i = 0; i < order.length; i++) if (!items[order[i]]) return null;
     order.forEach(function (k) { container.appendChild(items[k]); });
-    return true;
+    return function () {
+      kids.forEach(function (c) { container.appendChild(c); });
+    };
   }
 
   // Only data- attributes with plain values: nothing that loads, runs or links can be switched this way.
   function setAttr(el, name, value) {
-    if (!/^data-[a-z][a-z0-9-]{0,40}$/.test(String(name)) || !/^[A-Za-z0-9_-]{1,32}$/.test(String(value))) return false;
+    if (!/^data-[a-z][a-z0-9-]{0,40}$/.test(String(name)) || !/^[A-Za-z0-9_-]{1,32}$/.test(String(value))) return null;
+    var had = el.hasAttribute(name);
+    var before = el.getAttribute(name);
     el.setAttribute(name, value);
-    return true;
+    return function () {
+      if (had) el.setAttribute(name, before);
+      else el.removeAttribute(name);
+    };
   }
 
-  /** Returns false if any change could not be applied (a selector that matches nothing, say). */
-  function applyChanges(changes) {
-    var ok = true;
-    changes.forEach(function (c) {
+  function applyOne(c, el) {
+    try {
+      if (c.kind === 'text') return setText(el, c.text);
+      if (c.kind === 'style') return setStyle(el, c.style || {});
+      if (c.kind === 'order') return setOrder(el, c.order || []);
+      if (c.kind === 'attr') return setAttr(el, c.attr, c.value);
+    } catch (e) {}
+    return null;
+  }
+
+  // What the page shows right now: one set of changes, applied element by element so that it can be taken back.
+  // While the page is still being read in, a change waits for its element to be complete. Text and order need that
+  // (the browser is still adding to them); a style or a data- attribute can be set the moment the element exists.
+  var shown = null; // { json, items: [{ change, done: [element], failed }], undo: [function], state: 'pending' | 'settled' | 'dead', waiting: [function] }
+  var watcher = null;
+  var listening = false;
+
+  function complete(el, kind) {
+    if (document.readyState !== 'loading') return true;
+    if (kind === 'attr' || kind === 'style') return true;
+    for (var n = el; n; n = n.parentNode) if (n.nextSibling) return true; // something comes after it, so the browser is done with it
+    return false;
+  }
+
+  function step() {
+    var s = shown;
+    if (!s || s.state !== 'pending') return;
+    var all = true;
+    s.items.forEach(function (it) {
       var els;
-      try { els = document.querySelectorAll(c.selector); } catch (e) { els = []; }
-      if (!els.length) { ok = false; return; }
+      try { els = document.querySelectorAll(it.change.selector); } catch (e) { els = []; }
       Array.prototype.forEach.call(els, function (el) {
-        if (c.kind === 'text') setText(el, c.text);
-        else if (c.kind === 'style') setStyle(el, c.style || {});
-        else if (c.kind === 'order') { if (!setOrder(el, c.order || [])) ok = false; }
-        else if (c.kind === 'attr') { if (!setAttr(el, c.attr, c.value)) ok = false; }
+        if (it.done.indexOf(el) >= 0 || !complete(el, it.change.kind)) return;
+        it.done.push(el);
+        var undo = applyOne(it.change, el);
+        if (undo) s.undo.push(undo);
+        else it.failed = true;
       });
+      if (!it.done.length) all = false;
     });
-    return ok;
+    // Once the page is fully read in, whatever did not match is not coming.
+    if (!all && document.readyState === 'loading') return;
+    s.state = 'settled';
+    s.failed = s.items.some(function (it) { return it.failed || !it.done.length; });
+    if (watcher) { watcher.disconnect(); watcher = null; }
+    var w = s.waiting;
+    s.waiting = [];
+    w.forEach(function (f) { f(); });
+  }
+
+  function takeBack(s) {
+    if (!s) return;
+    s.state = 'dead';
+    s.waiting = [];
+    for (var i = s.undo.length - 1; i >= 0; i--) {
+      try { s.undo[i](); } catch (e) {}
+    }
+  }
+
+  /** Makes the page show these changes (and only these). Does nothing if it already does. */
+  function show(changes) {
+    var json = JSON.stringify(changes);
+    if (shown && shown.state !== 'dead' && shown.json === json) return shown;
+    takeBack(shown);
+    shown = { json: json, items: changes.map(function (c) { return { change: c, done: [], failed: false }; }), undo: [], state: 'pending', failed: false, waiting: [] };
+    step();
+    if (shown.state === 'pending') {
+      if (!watcher && window.MutationObserver) {
+        watcher = new MutationObserver(step);
+        watcher.observe(document.documentElement, { childList: true, subtree: true });
+      }
+      if (!listening) {
+        listening = true;
+        document.addEventListener('DOMContentLoaded', step);
+      }
+    }
+    return shown;
+  }
+
+  function whenShown(s, fn) {
+    if (s.state === 'settled') fn();
+    else if (s.state === 'pending') s.waiting.push(fn);
+  }
+
+  // The last answer for this page, kept in this site's own storage next to the visitor id.
+  var STORE = 'hone_ans_' + key;
+
+  function validChanges(a) {
+    if (!Array.isArray(a) || a.length > 50) return false;
+    for (var i = 0; i < a.length; i++) {
+      var c = a[i];
+      if (!c || typeof c !== 'object' || typeof c.selector !== 'string' || c.selector.length > 300) return false;
+      if (c.kind !== 'text' && c.kind !== 'style' && c.kind !== 'order' && c.kind !== 'attr') return false;
+    }
+    return true;
+  }
+  function validGoal(g) {
+    return !g || (typeof g === 'object' && ((g.type === 'click' && typeof g.selector === 'string') || (g.type === 'pageview' && typeof g.path === 'string')));
+  }
+
+  function recall() {
+    if (!rememberMs) return null;
+    try {
+      var x = JSON.parse(localStorage.getItem(STORE));
+      if (!x || x.v !== 1 || x.i !== id || x.p !== cleanPath(path) || typeof x.t !== 'number') return null;
+      var age = Date.now() - x.t;
+      if (age < 0 || age > rememberMs) return null;
+      var a = x.a;
+      if (!a || a.track !== true || typeof a.variant !== 'string' || !validChanges(a.changes) || !validGoal(a.goal)) return null;
+      return a;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /** Only a page the test is about, and only while the visitor is in a running test. Anything else forgets it. */
+  function remember(d) {
+    if (!rememberMs || !d.target) return;
+    try {
+      if (d.track && d.variant) {
+        localStorage.setItem(STORE, JSON.stringify({ v: 1, t: Date.now(), i: id, p: cleanPath(path), a: { variant: d.variant, track: true, changes: Array.isArray(d.changes) ? d.changes : [], goal: d.goal || null } }));
+      } else {
+        localStorage.removeItem(STORE);
+      }
+    } catch (e) {}
+  }
+
+  function markVariant(variant) {
+    if (variant) document.documentElement.setAttribute('data-hone-variant', variant);
+    else document.documentElement.removeAttribute('data-hone-variant');
+  }
+
+  function revealUnlessWaiting() {
+    if (!shown || shown.state !== 'pending') reveal();
   }
 
   function onAnswer(d) {
-    if (!d || d.v !== 1) return reveal();
-    if (d.changes && d.changes.length) applyFailed = !applyChanges(d.changes);
-    reveal();
-    window.__hone = { variant: d.variant, visitorId: id, assigned: d.assigned, track: d.track, applyFailed: applyFailed };
-    if (d.variant) document.documentElement.setAttribute('data-hone-variant', d.variant);
-    if (!d.track) return;
-    if (d.target) {
-      send('view', applyFailed ? 1 : 0);
-      watchHealth();
-    }
-    watchGoal(d.goal);
+    if (!d || d.v !== 1) return revealUnlessWaiting();
+    var s = show(Array.isArray(d.changes) ? d.changes : []);
+    markVariant(d.variant);
+    remember(d);
+    whenShown(s, function () {
+      reveal();
+      applyFailed = s.failed;
+      window.__hone = { variant: d.variant, visitorId: id, assigned: d.assigned, track: d.track, applyFailed: applyFailed };
+      if (!d.track) {
+        goal = null;
+        return;
+      }
+      if (d.target) {
+        send('view', applyFailed ? 1 : 0);
+        watchHealth();
+      }
+      watchGoal(d.goal);
+    });
   }
 
+  // Always ask, even when the page already shows the remembered answer.
   var url = api + '/api/decide?e=' + encodeURIComponent(key) + '&v=' + encodeURIComponent(id) + '&p=' + encodeURIComponent(path);
   try {
     fetch(url, { credentials: 'omit', cache: 'no-store', mode: 'cors' })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(onAnswer)
-      .catch(reveal);
+      .catch(revealUnlessWaiting);
   } catch (e) {
-    reveal();
+    revealUnlessWaiting();
+  }
+
+  var remembered = recall();
+  if (remembered) {
+    var first = show(remembered.changes);
+    markVariant(remembered.variant);
+    whenShown(first, reveal);
+    // A click that comes before the server has answered still counts: the server checks the visitor and the test itself.
+    watchGoal(remembered.goal);
   }
 
   // 4. Reporting.
@@ -190,19 +354,23 @@
     window.addEventListener('pagehide', flush);
   }
 
-  function watchGoal(goal) {
+  // The goal is watched once per page. The server's answer replaces the remembered one, and can switch it off.
+  function fireGoal() {
+    if (goalFired) return;
+    goalFired = true;
+    send('goal', 0);
+  }
+
+  function watchGoal(g) {
+    goal = g || null;
     if (!goal) return;
-    var fired = false;
-    function fire() {
-      if (fired) return;
-      fired = true;
-      send('goal', 0);
-    }
     if (goal.type === 'pageview') {
-      if (cleanPath(goal.path) === cleanPath(path)) fire();
-    } else if (goal.type === 'click') {
+      if (cleanPath(goal.path) === cleanPath(path)) fireGoal();
+    } else if (goal.type === 'click' && !goalListening) {
+      goalListening = true;
       document.addEventListener('click', function (ev) {
-        try { if (ev.target && ev.target.closest && ev.target.closest(goal.selector)) fire(); } catch (e) {}
+        if (!goal || goal.type !== 'click') return;
+        try { if (ev.target && ev.target.closest && ev.target.closest(goal.selector)) fireGoal(); } catch (e) {}
       }, true);
     }
   }
