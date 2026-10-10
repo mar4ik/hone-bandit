@@ -46,10 +46,18 @@ test('the browser script, in a real browser, against the real handlers', { skip 
   apiPort = await listen(slowApi);
 
   const siteHtml = (extra = '', key = EXP, hide = '.hero-title,.hero-cta') => html.replace('<!--HONE-->', `<script src="http://127.0.0.1:${apiPort}/agent.js" data-experiment="${key}" data-hide="${hide}" ${extra}></script>`);
+  let streaming = false; // the front page arrives in two parts, the heading cut in half, 300 ms apart
   const site = createServer((req, res) => {
     const path = (req.url ?? '/').split('?')[0];
-    if (path === '/' || path === '/other' || path === '/down' || path === '/index.html' || path === '/switch') {
-      const body = path === '/down' ? siteHtml('data-api="http://127.0.0.1:9"') : path === '/switch' ? siteHtml('', EXP2, '.hero-a,.hero-b') : siteHtml();
+    if (path === '/' && streaming) {
+      const full = siteHtml();
+      const cut = full.indexOf('with AI today</h1>');
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      res.write(full.slice(0, cut));
+      return void setTimeout(() => res.end(full.slice(cut)), 300);
+    }
+    if (path === '/' || path === '/other' || path === '/down' || path === '/index.html' || path === '/switch' || path === '/norem') {
+      const body = path === '/down' ? siteHtml('data-api="http://127.0.0.1:9"') : path === '/switch' ? siteHtml('', EXP2, '.hero-a,.hero-b') : path === '/norem' ? siteHtml('data-remember="0"') : siteHtml();
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return void res.end(body);
     }
@@ -93,14 +101,22 @@ test('the browser script, in a real browser, against the real handlers', { skip 
 
   const chrome = await Chrome.launch(CHROME as string, UA);
   const pages: Page[] = [];
-  const open = async (opts: { visitor?: string; gpc?: boolean; headers?: Record<string, string> } = {}): Promise<Page> => {
+  /**
+   * storage: things already in the page's storage before anything runs (a saved answer, say).
+   * probe: JavaScript that says what the visitor would see right now (or null if not yet); every change is written down, one per screen refresh.
+   * beacons: write down everything the page reports.
+   */
+  const open = async (opts: { visitor?: string; gpc?: boolean; headers?: Record<string, string>; storage?: Record<string, string>; probe?: string; beacons?: boolean } = {}): Promise<Page> => {
     const p = await chrome.newPage();
     pages.push(p);
     await p.setup(UA, ['localhost', '127.0.0.1']);
     if (opts.headers) await p.send('Network.setExtraHTTPHeaders', { headers: opts.headers });
     const init = [
       opts.visitor ? `try{ if(!localStorage.getItem('hone_vid')) localStorage.setItem('hone_vid', ${JSON.stringify(opts.visitor)}) }catch(e){}` : '',
+      ...Object.entries(opts.storage ?? {}).map(([k, v]) => `try{ if(!localStorage.getItem(${JSON.stringify(k)})) localStorage.setItem(${JSON.stringify(k)}, ${JSON.stringify(v)}) }catch(e){}`),
       opts.gpc ? "Object.defineProperty(navigator, 'globalPrivacyControl', { value: true })" : '',
+      opts.probe ? `window.__seen = []; (function tick(){ try { var s = (${opts.probe}); if (s !== null && window.__seen[window.__seen.length - 1] !== s) window.__seen.push(s); } catch (e) {} requestAnimationFrame(tick); })()` : '',
+      opts.beacons ? "window.__beacons = []; (function(){ var o = navigator.sendBeacon.bind(navigator); navigator.sendBeacon = function (u, b) { Promise.resolve(b.text()).then(function (t) { window.__beacons.push(JSON.parse(t)); }); return o(u, b); }; })()" : '',
     ].join(';');
     if (init.replace(/;/g, '')) await p.send('Page.addScriptToEvaluateOnNewDocument', { source: init });
     return p;
@@ -116,6 +132,62 @@ test('the browser script, in a real browser, against the real handlers', { skip 
   const text = (p: Page, sel: string) => p.eval<string>(`document.querySelector(${JSON.stringify(sel)}).innerText`);
   const visible = (p: Page, sel: string) => p.eval<boolean>(`getComputedStyle(document.querySelector(${JSON.stringify(sel)})).visibility === 'visible'`);
   const measure = () => ctx.store.measure(EXP, { order: ['original', 'v1', 'v2', 'v3', 'v4'], now: Date.now(), windowMs: 7 * DAY, lagMs: DAY, confirmPhase: null, confirmN: 0, phase: 0 });
+
+
+  // ---- what a visitor who has been here before has saved ----
+  const STORE = `hone_ans_${EXP}`;
+  const v1Changes = [{ selector: 'h1.hero-title', kind: 'text', text: 'Learn AI without\nthe jargon', context: titleCtx }];
+  const v2Changes = [
+    { selector: 'a.hero-cta', kind: 'text', text: 'See the courses', context: { color: '#FFFFFF', background: '#C8381A', fontSizePx: 18, bold: true } },
+    { selector: 'a.hero-cta', kind: 'style', style: { background: '#14202B' }, context: { color: '#FFFFFF', background: '#C8381A', fontSizePx: 18, bold: true } },
+  ];
+  const savedAnswer = (id: string, variant: string, changes: unknown[], over: Record<string, unknown> = {}): string =>
+    JSON.stringify({ v: 1, t: Date.now(), i: id, p: '/', a: { variant, track: true, changes, goal: { type: 'click', selector: 'a.hero-cta' } }, ...over });
+  const fresh = (variant: string, tag: string): string => {
+    for (let i = 0; ; i++) {
+      const id = `browser-test-${tag}-${variant}-${i}`;
+      if (chooseVariant(view, id) === variant) return id;
+    }
+  };
+  const stored = async (p: Page): Promise<{ a: { variant: string; changes: unknown[] } } | null> => JSON.parse(await p.eval<string>(`localStorage.getItem(${JSON.stringify(STORE)}) || 'null'`));
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  /** Lets the page draw twice, so that the probe has looked at what is on screen. */
+  const frames = (p: Page) => p.eval('new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))');
+  /**
+   * The heading as a visitor would see it on each screen refresh: "visible|text" or "hidden|". While the browser is still reading the page in,
+   * a heading that is only half there is hidden on purpose; that is not written down.
+   */
+  const HEADING = `(function(){ var h = document.querySelector('h1.hero-title'); if (!h) return null; var v = getComputedStyle(h).visibility; if (v === 'hidden' && document.readyState === 'loading') return null; return v + '|' + h.innerText; })()`;
+  const ORIGINAL_HEADING = 'Learn to work\nwith AI today';
+  const V1_HEADING = 'Learn AI without\nthe jargon';
+  const ORIGINAL_RAW = 'Learn to workwith AI today'; // innerText says nothing about a hidden heading, so the raw text is used where it is hidden
+  const rawText = (p: Page, sel: string) => p.eval<string>(`document.querySelector(${JSON.stringify(sel)}).textContent`);
+  /**
+   * Opens the front page and looks at it 250 ms later. If the machine was too busy to get there in time (the page's own 700 ms limit
+   * would have passed), it starts over with a new page, a few times; this keeps the checks about waiting honest on a loaded machine.
+   */
+  const lookEarly = async (mk: () => Promise<Page>, url: string, look: (p: Page) => Promise<void>): Promise<Page> => {
+    for (let tries = 0; ; tries++) {
+      const p = await mk();
+      const t0 = Date.now();
+      await p.goto(url);
+      await sleep(250);
+      if (Date.now() - t0 < 500 || tries >= 4) {
+        await look(p);
+        return p;
+      }
+      p.close();
+    }
+  };
+  /** Runs a check while the server's answer is held back. */
+  const withSlowServer = async (ms: number, fn: () => Promise<void>): Promise<void> => {
+    delayDecideMs = ms;
+    try {
+      await fn();
+    } finally {
+      delayDecideMs = 0;
+    }
+  };
 
   await t.test('each kind of change is applied, and the original is left alone', async () => {
     let p = await open({ visitor: idFor('v1') });
@@ -238,13 +310,14 @@ test('the browser script, in a real browser, against the real handlers', { skip 
 
   await t.test('Global Privacy Control: the page is left alone and nothing is stored, not even an id', async () => {
     const id = idFor('v1');
-    const p = await open({ visitor: id, gpc: true });
+    const p = await open({ visitor: id, gpc: true, storage: { [STORE]: savedAnswer(id, 'v1', v1Changes) } });
     await p.goto(`${siteUrl}/`);
     await new Promise((r) => setTimeout(r, 900));
     assert.equal(await p.eval('window.__hone === undefined'), true);
-    assert.equal(await text(p, 'h1.hero-title'), 'Learn to work\nwith AI today');
+    assert.equal(await text(p, 'h1.hero-title'), 'Learn to work\nwith AI today', 'even a saved answer is not used');
     assert.equal(await visible(p, 'h1.hero-title'), true);
     assert.equal(await p.eval('localStorage.getItem("hone_vid")'), id, 'only what the test put there');
+    assert.deepEqual(await p.eval('Object.keys(localStorage).sort()'), ['hone_vid', STORE].sort(), 'nothing new is stored');
     const p2 = await open({ gpc: true });
     await p2.goto(`${siteUrl}/`);
     await new Promise((r) => setTimeout(r, 600));
@@ -275,6 +348,189 @@ test('the browser script, in a real browser, against the real handlers', { skip 
     }
   });
 
+  // ------------------------------------------------------------------ the remembered answer
+
+  await t.test('a visitor who was here before sees their version from the first screen refresh, even while the server is slow', async () => {
+    const id = fresh('v1', 'rem-a');
+    const p = await open({ visitor: id, probe: HEADING });
+    await p.goto(`${siteUrl}/`); // the first visit: the page waits for the server, which then answers
+    await p.waitFor('window.__hone');
+    await frames(p);
+    assert.equal((await stored(p))?.a.variant, 'v1', 'the answer is kept');
+    assert.deepEqual((await p.eval<string[]>('window.__seen')).filter((x) => x.startsWith('visible|')), [`visible|${V1_HEADING}`], 'a new visitor sees the answer, not the original, once it is there');
+
+    await withSlowServer(1500, async () => {
+      await p.goto(`${siteUrl}/`);
+      assert.equal(await p.eval('window.__hone === undefined'), true, 'the server has not answered yet');
+      assert.equal(await text(p, 'h1.hero-title'), V1_HEADING);
+      assert.equal(await visible(p, 'h1.hero-title'), true);
+      assert.equal(await p.eval('document.documentElement.getAttribute("data-hone-variant")'), 'v1');
+      await p.waitFor('window.__hone', 4000);
+      assert.equal((await hone(p))?.variant, 'v1');
+      await frames(p);
+      assert.deepEqual(await p.eval('window.__seen'), [`visible|${V1_HEADING}`], 'never hidden, never the original, never a second change');
+    });
+  });
+
+  await t.test('a returning visitor who was given the original sees it at once, too', async () => {
+    const id = fresh('original', 'rem-b');
+    const p = await open({ visitor: id, probe: HEADING });
+    await p.goto(`${siteUrl}/`);
+    await p.waitFor('window.__hone');
+    assert.equal((await stored(p))?.a.variant, 'original');
+    await withSlowServer(1500, async () => {
+      await p.goto(`${siteUrl}/`);
+      assert.equal(await p.eval('window.__hone === undefined'), true);
+      await frames(p);
+      assert.deepEqual(await p.eval('window.__seen'), [`visible|${ORIGINAL_HEADING}`], 'no wait for something that does not change');
+    });
+  });
+
+  await t.test('a new visitor still waits for the answer, and nothing is kept until it comes', async () => {
+    await withSlowServer(1500, async () => {
+      await lookEarly(() => open({ visitor: fresh('v1', 'rem-c') }), `${siteUrl}/`, async (p) => {
+        assert.equal(await visible(p, 'h1.hero-title'), false, 'hidden while the server thinks');
+        assert.equal(await stored(p), null);
+        await p.waitFor('window.__hone', 4000);
+        assert.equal(await text(p, 'h1.hero-title'), V1_HEADING);
+        assert.equal((await stored(p))?.a.variant, 'v1');
+      });
+    });
+  });
+
+  await t.test('when the server says something different, the page switches to it, takes back what the saved answer had changed, and keeps the new answer', async () => {
+    const id = fresh('v1', 'rem-d');
+    await sleep(400); // let the views that earlier checks reported arrive before counting
+    const m0 = await measure();
+    const before = { v1: m0.variants.v1.views, v2: m0.variants.v2.views };
+    await withSlowServer(2000, async () => {
+      // The saved answer is Version 2 (button text and colour), but the server has this visitor on Version 1 (heading).
+      const p = await open({ visitor: id, storage: { [STORE]: savedAnswer(id, 'v2', v2Changes) } });
+      await p.goto(`${siteUrl}/`);
+      assert.equal(await text(p, 'a.hero-cta'), 'See the courses', 'what was saved is shown first');
+      assert.equal(await p.eval('getComputedStyle(document.querySelector("a.hero-cta")).backgroundColor'), 'rgb(20, 32, 43)');
+      assert.equal(await text(p, 'h1.hero-title'), ORIGINAL_HEADING);
+      await p.waitFor('window.__hone', 4000);
+      assert.equal((await hone(p))?.variant, 'v1');
+      assert.equal(await text(p, 'h1.hero-title'), V1_HEADING);
+      assert.equal(await text(p, 'a.hero-cta'), 'Choose a course', 'the button is back as it was');
+      assert.equal(await p.eval('getComputedStyle(document.querySelector("a.hero-cta")).backgroundColor'), 'rgb(200, 56, 26)', 'and so is its colour');
+      assert.equal(await p.eval('document.documentElement.getAttribute("data-hone-variant")'), 'v1');
+      assert.equal((await stored(p))?.a.variant, 'v1', 'the saved answer is now the new one');
+    });
+    await until(async () => (await measure()).variants.v1.views === before.v1 + 1);
+    await sleep(300);
+    const after = await measure();
+    assert.equal(after.variants.v1.views, before.v1 + 1, 'the view is counted for the version the server chose');
+    assert.equal(after.variants.v2.views, before.v2, 'and not for the one that was only shown from memory');
+  });
+
+  await t.test('a click on the goal before the server has answered still counts, once', async () => {
+    const id = fresh('v1', 'rem-e');
+    const p = await open({ visitor: id, beacons: true });
+    await p.goto(`${siteUrl}/`);
+    await p.waitFor('window.__hone');
+    assert.equal((await ctx.store.getVisitor(EXP, id))?.convertedAt ?? null, null);
+    await withSlowServer(2500, async () => {
+      await p.goto(`${siteUrl}/`);
+      const clicked = Date.now();
+      await p.eval('document.querySelector("a.hero-cta").addEventListener("click", e => e.preventDefault()); document.querySelector("a.hero-cta").click()');
+      await until(async () => (await ctx.store.getVisitor(EXP, id))?.convertedAt != null, 1500);
+      assert.ok(Date.now() - clicked < 1500, 'counted without waiting for the answer');
+      assert.equal(await p.eval('window.__hone === undefined'), true, '(which had not come yet)');
+      await p.waitFor('window.__hone', 4000);
+      await p.eval('document.querySelector("a.hero-cta").click()'); // and a second click changes nothing
+      await sleep(200);
+      const sent = await p.eval<Array<{ t: string }>>('window.__beacons');
+      assert.equal(sent.filter((b) => b.t === 'goal').length, 1, 'reported once');
+      assert.equal(sent.filter((b) => b.t === 'view').length, 1, 'and the view once, after the answer');
+    });
+  });
+
+  await t.test('a saved answer that is old, for someone else, for another page or damaged is ignored: the page waits for the server as for a new visitor', async () => {
+    const cases: Array<[string, (id: string) => string]> = [
+      ['older than 6 hours', (id) => savedAnswer(id, 'v1', v1Changes, { t: Date.now() - 7 * 3600 * 1000 })],
+      ['from the future', (id) => savedAnswer(id, 'v1', v1Changes, { t: Date.now() + 3600 * 1000 })],
+      ['for another visitor id', () => savedAnswer('someone-else-0001', 'v1', v1Changes)],
+      ['for another page', (id) => savedAnswer(id, 'v1', v1Changes, { p: '/other' })],
+      ['not JSON', () => 'v1 please'],
+      ['the visitor was not in the test', (id) => savedAnswer(id, 'v1', v1Changes, { a: { variant: 'v1', track: false, changes: v1Changes, goal: null } })],
+      ['changes that make no sense', (id) => savedAnswer(id, 'v1', v1Changes, { a: { variant: 'v1', track: true, changes: [{ selector: 5, kind: 'script' }], goal: null } })],
+    ];
+    await withSlowServer(1200, async () => {
+      for (const [why, make] of cases) {
+        const id = fresh('v1', 'rem-f');
+        await lookEarly(() => open({ visitor: id, storage: { [STORE]: make(id) } }), `${siteUrl}/`, async (p) => {
+          assert.equal(await visible(p, 'h1.hero-title'), false, `${why}: hidden until the server answers`);
+          assert.equal(await rawText(p, 'h1.hero-title'), ORIGINAL_RAW, `${why}: nothing from the saved answer is applied`);
+          await p.waitFor('window.__hone', 4000);
+          assert.equal(await text(p, 'h1.hero-title'), V1_HEADING, why);
+          assert.equal((await stored(p))?.a.variant, 'v1', `${why}: replaced by the real answer`);
+        });
+      }
+    });
+  });
+
+  await t.test('data-remember="0": nothing is kept and nothing is used', async () => {
+    const id = fresh('v1', 'rem-g');
+    let p: Page | null = null;
+    await withSlowServer(1200, async () => {
+      p = await lookEarly(() => open({ visitor: id, storage: { [STORE]: savedAnswer(id, 'v1', v1Changes) } }), `${siteUrl}/norem`, async (q) => {
+        assert.equal(await visible(q, 'h1.hero-title'), false, 'waits like a new visitor');
+        await q.waitFor('window.__hone', 4000);
+      });
+    });
+    await (p as unknown as Page).goto(`${siteUrl}/norem`);
+    await (p as unknown as Page).waitFor('window.__hone');
+    const p2 = await open({ visitor: fresh('v1', 'rem-h') });
+    await p2.goto(`${siteUrl}/norem`);
+    await p2.waitFor('window.__hone');
+    assert.deepEqual(await p2.eval('Object.keys(localStorage)'), ['hone_vid'], 'only the visitor id');
+  });
+
+  await t.test('a page that is still arriving: the change waits for the heading to be complete, and is applied once, whoever asks first', async () => {
+    streaming = true;
+    try {
+      // A new visitor: the answer is back long before the heading is.
+      const id = fresh('v1', 'rem-i');
+      const p = await open({ visitor: id, probe: HEADING });
+      await p.goto(`${siteUrl}/`);
+      await p.waitFor('window.__hone');
+      await frames(p);
+      assert.equal((await hone(p))?.applyFailed, false, 'nothing is reported as failed just because the page had not arrived yet');
+      assert.equal(await text(p, 'h1.hero-title'), V1_HEADING, 'not mixed up with the half that arrived late');
+      assert.equal(await p.eval('document.querySelectorAll("h1.hero-title br").length'), 1);
+      assert.deepEqual((await p.eval<string[]>('window.__seen')).filter((x) => x.startsWith('visible|')), [`visible|${V1_HEADING}`]);
+
+      // The same visitor again: now the saved answer is waiting for the heading.
+      await p.goto(`${siteUrl}/`);
+      await p.waitFor('window.__hone');
+      await frames(p);
+      assert.equal(await text(p, 'h1.hero-title'), V1_HEADING);
+      assert.equal(await p.eval('document.querySelectorAll("h1.hero-title br").length'), 1);
+      assert.deepEqual((await p.eval<string[]>('window.__seen')).filter((x) => x.startsWith('visible|')), [`visible|${V1_HEADING}`], 'the original is never shown');
+    } finally {
+      streaming = false;
+    }
+  });
+
+  await t.test('the hero switch: a returning visitor has the right hero from the first screen refresh, and the other one is never shown', async () => {
+    const view2 = viewFromState(EXP2, ['original', 'hero-a'], (await ctx.store.getExperiment(EXP2))!.state, false);
+    let id = '';
+    for (let i = 0; !id; i++) if (chooseVariant(view2, `browser-switch-rem-${i}`) === 'hero-a') id = `browser-switch-rem-${i}`;
+    const HEROES = `(function(){ var a = document.querySelector('.hero-a'), b = document.querySelector('.hero-b'); if (!a || !b) return null; var on = function (e) { var c = getComputedStyle(e); return c.display !== 'none' && c.visibility === 'visible'; }; return 'data-hero=' + document.documentElement.dataset.hero + ' A=' + on(a) + ' B=' + on(b); })()`;
+    const p = await open({ visitor: id, probe: HEROES });
+    await p.goto(`${siteUrl}/switch`);
+    await p.waitFor('window.__hone');
+    assert.ok(await p.eval('localStorage.getItem("hone_ans_" + ' + JSON.stringify(EXP2) + ')'), 'saved');
+    await withSlowServer(1500, async () => {
+      await p.goto(`${siteUrl}/switch`);
+      assert.equal(await p.eval('window.__hone === undefined'), true);
+      await frames(p);
+      assert.deepEqual(await p.eval('window.__seen'), ['data-hero=a A=true B=false'], 'Hero A from the very first refresh, Hero B never');
+    });
+  });
+
   await t.test('a site that is not on the list gets nothing, and nothing is stored', async () => {
     const id = `browser-test-foreign-${Date.now()}`;
     const p = await open({ visitor: id });
@@ -298,6 +554,37 @@ test('the browser script, in a real browser, against the real handlers', { skip 
     await new Promise((r) => setTimeout(r, 500));
     assert.equal((await measure()).variants.v1.views, before);
     await handleAdmin(adminReq('POST', `/experiments/${EXP}/resume`, { reason: 'done' }), ctx);
+  });
+
+
+  await t.test('the kill switch, for a visitor with a saved answer: the page goes back to the original, the answer is forgotten, nothing is reported', async () => {
+    const id = fresh('v1', 'rem-k');
+    const p = await open({ visitor: id });
+    await p.goto(`${siteUrl}/`);
+    await p.waitFor('window.__hone');
+    assert.equal((await stored(p))?.a.variant, 'v1');
+    await sleep(400); // this visit's own view arrives first
+    const before = (await measure()).variants.v1.views;
+    await handleAdmin(adminReq('POST', `/experiments/${EXP}/kill`, { reason: 'browser test, saved answer' }), ctx);
+    try {
+      await withSlowServer(2000, async () => {
+        await p.goto(`${siteUrl}/`);
+        assert.equal(await text(p, 'h1.hero-title'), V1_HEADING, 'shown from memory until the server says otherwise');
+        await p.waitFor('window.__hone', 4000);
+        const h = await hone(p);
+        assert.deepEqual([h?.variant, h?.track], ['original', false]);
+        assert.equal(await text(p, 'h1.hero-title'), ORIGINAL_HEADING);
+        assert.equal(await stored(p), null, 'forgotten');
+      });
+      await sleep(400);
+      assert.equal((await measure()).variants.v1.views, before);
+      // A goal click is not reported either: the server ignores it, and the page has stopped watching.
+      await p.eval('document.querySelector("a.hero-cta").addEventListener("click", e => e.preventDefault()); document.querySelector("a.hero-cta").click()');
+      await sleep(300);
+      assert.equal((await ctx.store.getVisitor(EXP, id))?.convertedAt ?? null, null);
+    } finally {
+      await handleAdmin(adminReq('POST', `/experiments/${EXP}/resume`, { reason: 'done' }), ctx);
+    }
   });
 
 });
