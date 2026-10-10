@@ -557,6 +557,99 @@ test('the browser script, in a real browser, against the real handlers', { skip 
   });
 
 
+  // ---- an answer that came with the page, in a cookie (edge/hone-edge.mjs decided before the page was sent) ----
+  const setCookie = (p: Page, name: string, value: string) => p.send('Network.setCookie', { name, value, url: siteUrl, path: '/' });
+  const listenForAnswers = (p: Page) => p.send('Page.addScriptToEvaluateOnNewDocument', { source: 'window.__answers = []; document.addEventListener("hone:answer", function (e) { window.__answers.push(e.detail); })' });
+
+  await t.test('an answer that arrives in a cookie with the page is shown at once, like a saved one, for a visitor with nothing stored; the server\'s word follows as an event', async () => {
+    const id = fresh('v1', 'edge-a');
+    const p = await open({ probe: HEADING });
+    await listenForAnswers(p);
+    await setCookie(p, 'hone_vid', id);
+    await setCookie(p, STORE, encodeURIComponent(savedAnswer(id, 'v1', v1Changes)));
+    await withSlowServer(1500, async () => {
+      await p.goto(`${siteUrl}/`);
+      assert.equal(await p.eval('window.__hone === undefined'), true, 'the server has not answered yet');
+      assert.equal(await text(p, 'h1.hero-title'), V1_HEADING);
+      assert.equal(await visible(p, 'h1.hero-title'), true);
+      assert.equal(await p.eval('document.documentElement.getAttribute("data-hone-variant")'), 'v1');
+      assert.deepEqual(await p.eval('window.__answers'), [], 'no word from the server yet');
+      await p.waitFor('window.__hone', 4000);
+      assert.equal((await hone(p))?.visitorId, id, 'the id is the one in the cookie');
+      await frames(p);
+      assert.deepEqual(await p.eval('window.__seen'), [`visible|${V1_HEADING}`], 'never hidden, never the original, never a second change');
+      const answers = await p.eval<Array<{ variant: string; changes: unknown[]; track: boolean }>>('window.__answers');
+      assert.equal(answers.length, 1);
+      assert.deepEqual([answers[0].variant, answers[0].track, answers[0].changes.length], ['v1', true, 1]);
+    });
+  });
+
+  await t.test('when the server says something other than the cookie, the page switches, the event says so, and the newer answer is what the next visit uses', async () => {
+    const id = fresh('original', 'edge-b');
+    const p = await open({ probe: HEADING });
+    await listenForAnswers(p);
+    await setCookie(p, 'hone_vid', id);
+    await setCookie(p, STORE, encodeURIComponent(savedAnswer(id, 'v1', v1Changes)));
+    await withSlowServer(600, async () => {
+      await p.goto(`${siteUrl}/`);
+      assert.equal(await text(p, 'h1.hero-title'), V1_HEADING, 'the cookie\'s answer first');
+      await p.waitFor('window.__hone', 4000);
+      assert.equal(await text(p, 'h1.hero-title'), ORIGINAL_HEADING, 'then the server\'s');
+      const answers = await p.eval<Array<{ variant: string; changes: unknown[] }>>('window.__answers');
+      assert.deepEqual(answers.map((a) => [a.variant, a.changes.length]), [['original', 0]]);
+    });
+    await withSlowServer(1500, async () => {
+      await p.goto(`${siteUrl}/`);
+      assert.equal(await text(p, 'h1.hero-title'), ORIGINAL_HEADING, 'the newer saved answer beats the older cookie');
+      await p.waitFor('window.__hone', 4000);
+    });
+  });
+
+  await t.test('a cookie answer that is old, for someone else, for another page or damaged is ignored: the page waits for the server as for a new visitor', async () => {
+    const id = fresh('v1', 'edge-c');
+    const bad: Record<string, string> = {
+      old: encodeURIComponent(savedAnswer(id, 'v1', v1Changes, { t: Date.now() - 7 * 3600000 })),
+      'someone else': encodeURIComponent(savedAnswer(id, 'v1', v1Changes, { i: 'somebody-else-0000' })),
+      'another page': encodeURIComponent(savedAnswer(id, 'v1', v1Changes, { p: '/other' })),
+      damaged: '%7Bnot-json',
+    };
+    for (const [what, value] of Object.entries(bad)) {
+      await withSlowServer(1200, async () => {
+        const p = await lookEarly(async () => {
+          const q = await open({});
+          await setCookie(q, 'hone_vid', id);
+          await setCookie(q, STORE, value);
+          return q;
+        }, `${siteUrl}/`, async (q) => {
+          assert.equal(await visible(q, 'h1.hero-title'), false, `${what}: hidden while the server thinks`);
+          assert.equal(await rawText(q, 'h1.hero-title'), ORIGINAL_RAW, `${what}: nothing was applied from the cookie`);
+        });
+        await p.waitFor('window.__hone', 4000);
+        assert.equal(await text(p, 'h1.hero-title'), V1_HEADING, what);
+      });
+    }
+  });
+
+  await t.test('the kill switch, for a visitor whose answer came in a cookie: back to the original, and the cookie is taken away', async () => {
+    const id = fresh('v1', 'edge-k');
+    await handleAdmin(adminReq('POST', `/experiments/${EXP}/kill`, { reason: 'browser test, cookie answer' }), ctx);
+    try {
+      const p = await open({});
+      await setCookie(p, 'hone_vid', id);
+      await setCookie(p, STORE, encodeURIComponent(savedAnswer(id, 'v1', v1Changes)));
+      await withSlowServer(600, async () => {
+        await p.goto(`${siteUrl}/`);
+        assert.equal(await text(p, 'h1.hero-title'), V1_HEADING, 'shown from the cookie until the server says otherwise');
+        await p.waitFor('window.__hone', 4000);
+        assert.deepEqual([(await hone(p))?.variant, (await hone(p))?.track], ['original', false]);
+        assert.equal(await text(p, 'h1.hero-title'), ORIGINAL_HEADING);
+        assert.equal(await p.eval(`document.cookie.indexOf(${JSON.stringify(STORE)}) >= 0`), false, 'the cookie is taken away');
+      });
+    } finally {
+      await handleAdmin(adminReq('POST', `/experiments/${EXP}/resume`, { reason: 'done' }), ctx);
+    }
+  });
+
   await t.test('the kill switch, for a visitor with a saved answer: the page goes back to the original, the answer is forgotten, nothing is reported', async () => {
     const id = fresh('v1', 'rem-k');
     const p = await open({ visitor: id });
